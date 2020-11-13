@@ -1,6 +1,13 @@
 #include <iostream>
-#include "hello.h"
+#include "TH1F.h"
 
 int main() {
-    hello();
+    TH1F hist(
+        "testhist",
+        "This is a test",
+        100,
+        -5.0,
+        5.0
+    );
+    hist.FillRandom("gaus", 100);
 }
