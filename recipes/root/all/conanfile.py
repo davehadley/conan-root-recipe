@@ -19,7 +19,8 @@ class RootConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        version = self.version.replace("v", "")
+        cmake.configure(source_folder=f"root-{version}")
         cmake.build()
 
     def package(self):
