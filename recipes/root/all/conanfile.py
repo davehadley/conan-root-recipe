@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import CMake, ConanFile, tools
 
 
 class RootConan(ConanFile):
@@ -19,10 +19,13 @@ class RootConan(ConanFile):
         # This small hack might be useful to guarantee proper /MT /MD linkage
         # in MSVC if the packaged project doesn't have variables to set it
         # properly
-        tools.replace_in_file("hello/CMakeLists.txt", "PROJECT(HelloWorld)",
-                              '''PROJECT(HelloWorld)
+        tools.replace_in_file(
+            "hello/CMakeLists.txt",
+            "PROJECT(HelloWorld)",
+            """PROJECT(HelloWorld)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
+conan_basic_setup()""",
+        )
 
     def build(self):
         cmake = CMake(self)
@@ -44,4 +47,3 @@ conan_basic_setup()''')
 
     def package_info(self):
         self.cpp_info.libs = ["hello"]
-
