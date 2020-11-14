@@ -13,6 +13,7 @@ class RootConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = {"shared": False}
     generators = "cmake"
+    requires = "lz4/1.9.2", "xorg/system"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
