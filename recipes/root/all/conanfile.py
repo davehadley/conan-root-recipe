@@ -30,23 +30,6 @@ class RootConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
 
     def build(self):
-        # Hack, fix configure scripts that have wrong permissions out of the zip file
-        # for pattern in ["**/configure", "*.sh"]:
-        #    for f in Path("./").glob(pattern):
-        #        print(f"-- Making file executable {f}")
-        #        os.chmod(f,  os.stat(f).st_mode | stat.S_IEXEC)
-        # Paths and libraries, all
-        print("-------- ALL --------------")
-        print(self.deps_cpp_info.include_paths)
-        print(self.deps_cpp_info.lib_paths)
-        print(self.deps_cpp_info.bin_paths)
-        print(self.deps_cpp_info.libs)
-        print(self.deps_cpp_info.defines)
-        print(self.deps_cpp_info.cflags)
-        print(self.deps_cpp_info.cxxflags)
-        print(self.deps_cpp_info.sharedlinkflags)
-        print(self.deps_cpp_info.exelinkflags)
-        print("DONE!")
         cmake = CMake(self)
         version = self.version.replace("v", "")
         cmake.configure(
