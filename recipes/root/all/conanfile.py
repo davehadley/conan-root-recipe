@@ -10,8 +10,8 @@ class RootConan(ConanFile):
     description = "CERN ROOT data analysis framework."
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    # options = {"shared": [True, False]}
+    # default_options = {"shared": False}
     generators = "cmake"
     requires = (
         "lz4/1.9.2",
@@ -32,6 +32,7 @@ class RootConan(ConanFile):
         version = self.version.replace("v", "")
         cmake.configure(source_folder=f"root-{version}")
         cmake.build()
+        cmake.test()
 
     def package(self):
         self.copy("*.h*", dst="include", src="include", keep_path=True)
