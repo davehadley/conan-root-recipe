@@ -14,7 +14,7 @@ class RootConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     # options = {"shared": [True, False]}
     # default_options = {"shared": False}
-    generators = "txt"
+    generators = "txt", "cmake"
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -67,12 +67,12 @@ class RootConan(ConanFile):
                 "gfal": "OFF",
                 "tmva-pymva": "OFF",
                 # set paths to Conan provided depedencies
-                "LIBXML2_LIBRARY": self._getlibsopt("libxml2"),
-                "LIBXML2_INCLUDE_DIR": self._getincludeopt("libxml2"),
-                # "CMAKE_LIBRARY_PATH" : ";".join(self.deps_cpp_info.libs),
-                # "CMAKE_INCLUDE_PATH" : ",".join(self.deps_cpp_info.include_paths),
-                "SQLITE_INCLUDE_DIR": self._getincludeopt("sqlite3"),
-                "SQLITE_LIBRARIES": self._getlibsopt("sqlite3"),
+                # "LIBXML2_LIBRARY": self._getlibsopt("libxml2"),
+                # "LIBXML2_INCLUDE_DIR": self._getincludeopt("libxml2"),
+                "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
+                "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
+                # "SQLITE_INCLUDE_DIR": self._getincludeopt("sqlite3"),
+                # "SQLITE_LIBRARIES": self._getlibsopt("sqlite3"),
             },
         )
         cmake.build()
