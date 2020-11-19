@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from conans import CMake, ConanFile, tools
 
 
@@ -25,9 +27,14 @@ class RootConan(ConanFile):
     )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
 
     def build(self):
+        # Hack, fix configure scripts that have wrong permissions out of the zip file
+        # for pattern in ["**/configure", "*.sh"]:
+        #    for f in Path("./").glob(pattern):
+        #        print(f"-- Making file executable {f}")
+        #        os.chmod(f,  os.stat(f).st_mode | stat.S_IEXEC)
         # Paths and libraries, all
         print("-------- ALL --------------")
         print(self.deps_cpp_info.include_paths)
@@ -60,12 +67,14 @@ class RootConan(ConanFile):
                 "builtin_openssl": "ON",
                 "builtin_fftw3": "ON",
                 "builtin_cfitsio": "ON",
-                "builtin_xrootd": "ON",
                 "builtin_ftgl": "ON",
                 "builtin_davix": "ON",
                 "builtin_tbb": "ON",
                 "builtin_vdt": "ON",
                 # "builtin_asimage" : "OFF",
+                # Doesn't build with builtin openssl.
+                "builtin_xrootd": "OFF",
+                "xrootd": "OFF",
                 # No Conan packages available for these dependencies yet
                 "pythia6": "OFF",
                 "pythia8": "OFF",
@@ -75,16 +84,12 @@ class RootConan(ConanFile):
                 "gfal": "OFF",
                 "tmva-pymva": "OFF",
                 # set paths to Conan provided depedencies
-                "LIBXML2_LIBRARY": str(self.deps_cpp_info["libxml2"].lib_paths[0]),
-                "LIBXML2_INCLUDE_DIR": str(
-                    self.deps_cpp_info["libxml2"].include_paths[0]
-                ),
+                "LIBXML2_LIBRARY": self._getlibsopt("libxml2"),
+                "LIBXML2_INCLUDE_DIR": self._getincludeopt("libxml2"),
                 # "CMAKE_LIBRARY_PATH" : ";".join(self.deps_cpp_info.libs),
                 # "CMAKE_INCLUDE_PATH" : ",".join(self.deps_cpp_info.include_paths),
-                "SQLITE_INCLUDE_DIR": str(
-                    self.deps_cpp_info["sqlite3"].include_paths[0]
-                ),
-                "SQLITE_LIBRARIES": str(self.deps_cpp_info["sqlite3"].lib_paths[0]),
+                "SQLITE_INCLUDE_DIR": self._getincludeopt("sqlite3"),
+                "SQLITE_LIBRARIES": self._getlibsopt("sqlite3"),
             },
         )
         cmake.build()
@@ -98,6 +103,20 @@ class RootConan(ConanFile):
     #     self.copy("*.so", dst="lib", src="lib", keep_path=False)
     #     self.copy("*.dylib", dst="lib", src="lib", keep_path=False)
     #     self.copy("*.a", dst="lib", src="lib", keep_path=False)
+
+    def _getincludeopt(self, depname: str) -> str:
+        return ";".join(self.deps_cpp_info[depname].include_paths)
+
+    def _getlibsopt(self, depname: str) -> str:
+        paths = self.deps_cpp_info[depname].lib_paths
+        libpaths = [
+            str(lib)
+            for p in paths
+            for pattern in ("*.so", "*.dll", "*.dylib", "*.lib", "*.a")
+            for lib in Path(p).glob(pattern)
+        ]
+        assert len(libpaths) >= 1
+        return ";".join(libpaths)
 
     def package_info(self):
         # get this list with root-config --libs
