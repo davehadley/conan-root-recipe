@@ -12,7 +12,7 @@ class RootConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True]}
     default_options = {"shared": True, "libxml2:shared": True, "sqlite3:shared": True}
-    generators = "txt", "cmake"
+    # generators = "txt", "cmake"
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
