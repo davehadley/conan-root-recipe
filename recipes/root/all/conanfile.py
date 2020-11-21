@@ -1,3 +1,5 @@
+import os
+
 from conans import CMake, ConanFile, tools
 
 
@@ -12,7 +14,7 @@ class RootConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True]}
     default_options = {"shared": True, "libxml2:shared": True, "sqlite3:shared": True}
-    # generators = "txt", "cmake"
+    generators = ("cmake_paths",)
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -24,8 +26,23 @@ class RootConan(ConanFile):
         # "libpng/1.6.37",
     )
 
+    @property
+    def _rootsrcdir(self) -> str:
+        version = self.version.replace("v", "")
+        return f"root-{version}"
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
+        tools.replace_in_file(
+            f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
+            "project(ROOT)",
+            """project(ROOT)
+            include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+            find_package(sqlite3)
+            set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
+            set(SQLITE_LIBRARIES ${SQLITE3_LIBRARIES})
+            """,
+        )
 
     def build(self):
         cmake = CMake(self, set_cmake_flags=True)
@@ -66,9 +83,6 @@ class RootConan(ConanFile):
                 # Tell CMake where to look for Conan provided depedencies
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
-                # Sqlite needs some special treatment
-                "SQLITE_INCLUDE_DIR": self._getincludeopt("sqlite3"),
-                "SQLITE_LIBRARIES": self._getalllibs("sqlite3"),
                 "CMAKE_VERBOSE_MAKEFILE": "ON",
             },
         )
