@@ -11,3 +11,4 @@ dependencies:
   - flake8>=3.8.4
   - conan>=1.31.2
   - cmake>=3.18.4
+  - make>=4.3
