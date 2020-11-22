@@ -23,21 +23,22 @@ TEST_CASE( "Basic histogram operation", "[hist]" ) {
 }
 
 void create_events_file(std::string name = "testevents.root", const int Nevent = 10, const int Npart = 10) {
-    TFile tfile(name.c_str(), "RECREATE");
-    TTree tree("tree", "tree");
+    auto tfile = TFile::Open(name.c_str(), "RECREATE");
+    auto tree = new TTree("tree", "tree");
     Event* event = 0;
-    tree.Branch("events", event);
+    tree->Branch("events", &event);
     for(int eventnum = 0; eventnum < Nevent; ++eventnum) {
         event = new Event();
         for (int id = 0; id < Npart; ++id) {
             event->particles.push_back(Particle(id, {1.0, 2.0, 3.0, 4.0}));
         }
-        tree.Fill();
+        tree->Fill();
         delete event;
         event = 0;
     }
-    tree.Write();
-    tfile.Close();
+    tree->Write();
+    tfile->Close();
+    delete tfile;
 }
 
 TEST_CASE( "Read/Write Events to File", "[tree]" ) {
@@ -53,9 +54,10 @@ TEST_CASE( "Read/Write Events to File", "[tree]" ) {
     while(reader.Next()) {
         didloop = true;
         REQUIRE(event.GetSetupStatus()==0);
-        REQUIRE(event->particles.size() == Npart);
+        auto ev = (*event);
+        REQUIRE(ev->particles.size() == Npart);
         for(int index = 0; index < Npart; ++index) {
-            auto& p = event->particles.at(index);
+            auto& p = ev->particles.at(index);
             REQUIRE(p.getID() == index);
             REQUIRE(p.getP4().X() == 1.0);
             REQUIRE(p.getP4().Y() == 2.0);
