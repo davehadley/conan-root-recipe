@@ -12,8 +12,13 @@ class RootConan(ConanFile):
     description = "CERN ROOT data analysis framework."
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True]}
-    default_options = {"shared": True, "libxml2:shared": True, "sqlite3:shared": True}
+    options = {"shared": [True],
+    "CMAKE_CXX_STANDARD": ["11", "14", "17"],
+    }
+    default_options = {"shared": True,
+    "CMAKE_CXX_STANDARD": "11", 
+    "libxml2:shared": True, "sqlite3:shared": True,
+    }
     generators = ("cmake_find_package",)
     requires = (
         "opengl/system",
@@ -43,14 +48,15 @@ class RootConan(ConanFile):
             """,
         )
 
-    def build(self):
+
+    def _configure_cmake(self) -> CMake:
         cmake = CMake(self, set_cmake_flags=True)
         version = self.version.replace("v", "")
         cmake.configure(
             source_folder=f"root-{version}",
             defs={
                 "fail-on-missing": "ON",
-                "CMAKE_CXX_STANDARD": str(11),
+                "CMAKE_CXX_STANDARD": self.options["CMAKE_CXX_STANDARD"],
                 # Prefer builtins where available
                 "builtin_pcre": "ON",
                 "builtin_lzma": "ON",
@@ -82,20 +88,16 @@ class RootConan(ConanFile):
                 # Tell CMake where to look for Conan provided depedencies
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
-                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                # "CMAKE_VERBOSE_MAKEFILE": "ON",
             },
         )
-        cmake.build()
-        cmake.install()
-        cmake.test()
+        return cmake
 
-    # def package(self):
-    #     self.copy("*.h*", dst="include", src="include", keep_path=True)
-    #     self.copy("*.lib", dst="lib", src="lib", keep_path=False)
-    #     self.copy("*", dst="bin", src="bin", keep_path=False)
-    #     self.copy("*.so", dst="lib", src="lib", keep_path=False)
-    #     self.copy("*.dylib", dst="lib", src="lib", keep_path=False)
-    #     self.copy("*.a", dst="lib", src="lib", keep_path=False)
+    def build(self):
+        self._configure_cmake().build()
+
+    def package(self):
+        self._configure_cmake().install()
 
     def _getalllibs(self, dep: str) -> str:
         return ";".join(
