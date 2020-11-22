@@ -5,6 +5,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TSystem.h"
 #include "TTreeReader.h"
 #include "Event.hpp"
 
@@ -26,7 +27,7 @@ void create_events_file(std::string name = "testevents.root", const int Nevent =
     auto tfile = TFile::Open(name.c_str(), "RECREATE");
     auto tree = new TTree("tree", "tree");
     Event* event = 0;
-    tree->Branch("events", &event);
+    tree->Branch("events", "Event", &event, 32000, 99);
     for(int eventnum = 0; eventnum < Nevent; ++eventnum) {
         event = new Event();
         for (int id = 0; id < Npart; ++id) {
@@ -42,19 +43,19 @@ void create_events_file(std::string name = "testevents.root", const int Nevent =
 }
 
 TEST_CASE( "Read/Write Events to File", "[tree]" ) {
+    gSystem->Load("libEvent");
     const std::string fname = "testevents.root";
     const int Nevent = 10;
     const int Npart = 10;
     create_events_file(fname, Nevent, Npart);
     auto tfile = TFile::Open(fname.c_str(), "READ");
-    TTreeReader reader("tree", tfile);
-    TTreeReaderValue<Event> event(reader, "events");
-    REQUIRE(reader.GetEntries() == Nevent);
-    bool didloop = false;
-    while(reader.Next()) {
-        didloop = true;
-        REQUIRE(event.GetSetupStatus()==0);
-        auto ev = (*event);
+    auto tree = tfile->Get<TTree>("tree");
+    Event* event = 0;
+    tree->SetBranchAddress("events", &event);
+    REQUIRE(tree->GetEntries() == Nevent);
+    for(int eventnum = 0; eventnum < Nevent; ++eventnum) {
+        REQUIRE(tree->GetEntry(eventnum)>0);
+        auto ev = event;    
         REQUIRE(ev->particles.size() == Npart);
         for(int index = 0; index < Npart; ++index) {
             auto& p = ev->particles.at(index);
@@ -62,10 +63,9 @@ TEST_CASE( "Read/Write Events to File", "[tree]" ) {
             REQUIRE(p.getP4().X() == 1.0);
             REQUIRE(p.getP4().Y() == 2.0);
             REQUIRE(p.getP4().Z() == 3.0);
-            REQUIRE(p.getP4().T() == 6.0);
+            REQUIRE(p.getP4().T() == 4.0);
         }
     }
-    REQUIRE(didloop);
 }
 
 
