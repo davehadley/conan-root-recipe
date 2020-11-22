@@ -37,9 +37,9 @@ class RootConan(ConanFile):
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
-            find_package(sqlite3 REQuIRED)
+            find_package(SQLite3 REQUIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
-            set(SQLITE_LIBRARIES sqlite3::sqlite3)
+            set(SQLITE_LIBRARIES SQLite::SQLite)
             """,
         )
 
