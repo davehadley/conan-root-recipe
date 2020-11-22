@@ -14,7 +14,7 @@ class RootConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True]}
     default_options = {"shared": True, "libxml2:shared": True, "sqlite3:shared": True}
-    generators = ("cmake_paths",)
+    generators = ("cmake_find_package",)
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -37,10 +37,9 @@ class RootConan(ConanFile):
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
-            include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-            find_package(sqlite3)
+            find_package(sqlite3 REQuIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
-            set(SQLITE_LIBRARIES ${SQLITE3_LIBRARIES})
+            set(SQLITE_LIBRARIES sqlite3::sqlite3)
             """,
         )
 
