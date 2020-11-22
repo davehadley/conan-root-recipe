@@ -10,4 +10,4 @@ dependencies:
   - black>=19.10b0
   - flake8>=3.8.4
   - conan>=1.31.2
-  
+  - cmake>=3.18.4
