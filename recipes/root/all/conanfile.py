@@ -107,17 +107,6 @@ class RootConan(ConanFile):
     def _getincludeopt(self, depname: str) -> str:
         return ";".join(self.deps_cpp_info[depname].include_paths)
 
-    # def _getlibsopt(self, depname: str) -> str:
-    #     paths = self.deps_cpp_info[depname].lib_paths
-    #     libpaths = [
-    #         str(lib)
-    #         for p in paths
-    #         for pattern in ("*.so", "*.dll", "*.dylib", "*.lib", "*.a")
-    #         for lib in Path(p).glob(pattern)
-    #     ]
-    #     assert len(libpaths) >= 1
-    #     return ";".join(libpaths)
-
     def package_info(self):
         # get this list with root-config --libs
         self.cpp_info.libs = [
@@ -140,4 +129,6 @@ class RootConan(ConanFile):
             "Thread",
             "MultiProc",
             "ROOTDataFrame",
+            "tbb",
+            "vdt",
         ]
