@@ -41,6 +41,7 @@ class RootConan(ConanFile):
         "libjpeg/9d",
         "libpng/1.6.37",
     )
+    exports_sources = ["FindROOT.cmake"]
 
     @property
     def _rootsrcdir(self) -> str:
@@ -110,6 +111,7 @@ class RootConan(ConanFile):
         self._configure_cmake().build()
 
     def package(self):
+        self.copy("FindROOT.cmake", ".", ".")
         self._configure_cmake().install()
 
     def _getalllibs(self, dep: str) -> str:

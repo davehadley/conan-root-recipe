@@ -22,4 +22,6 @@ class RootTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(".%sexample" % os.sep)
+            self.run("env", run_environment=True)
+            self.run(".%sexample_targets" % os.sep, run_environment=True)
+            self.run(".%sexample_vars" % os.sep, run_environment=True)
