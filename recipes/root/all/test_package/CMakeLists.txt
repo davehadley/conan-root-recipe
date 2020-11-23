@@ -16,7 +16,7 @@ add_library(Event SHARED Particle.cpp Event.cpp G__Event.cxx)
 # target_link_libraries(Event)
 
 add_executable(example example.cpp)
-target_link_libraries(example_targets Event ROOT::Core ROOT::Hist ROOT::Tree ROOT::Physics ROOT::Thread)
+target_link_libraries(example Event ROOT::Core ROOT::Hist ROOT::Tree ROOT::Physics ROOT::Thread)
 
 include(GNUInstallDirs)
 install(TARGETS example
@@ -27,7 +27,7 @@ install(TARGETS example
 
 
 # CTest is a testing tool that can be used to test your project.
-# enable_testing()
-# add_test(NAME example
-#          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-#          COMMAND example)
+enable_testing()
+add_test(NAME example
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+          COMMAND example)
