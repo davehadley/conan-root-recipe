@@ -3,11 +3,11 @@ import os
 from conans import CMake, ConanFile, tools
 
 
-class PythonSetting:
+class PythonOption:
     OFF = "off"
     SYSTEM = "system"
-    # in future we may allow the user to specify a version...
-
+    # in future we may allow the user to specify a version when
+    # libPython is available in Conan package center
     ALL = [OFF, SYSTEM]
     DEFAULT = OFF
 
@@ -16,22 +16,22 @@ class RootConan(ConanFile):
     name = "root"
     version = "v6-22-02"
     license = (
-        "LGPL-2.1-or-later"  # of ROOT itself, the conan recipe is under MIT license.
+        "LGPL-2.1-or-later"  # of ROOT itself, the Conan recipe is under MIT license.
     )
     homepage = "https://root.cern/"
     url = "https://github.com/davehadley/conan-root-recipe"  # ROOT itself is located at: https://github.com/root-project/root
     description = "CERN ROOT data analysis framework."
     topics = ("data-analysis", "physics")
     settings = ("os", "compiler", "build_type", "arch")
-    options = {"shared": [True, False], "python": PythonSetting.ALL}
+    options = {"shared": [True, False], "python": PythonOption.ALL}
     default_options = {
         "shared": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
         # default pyroot to off as there is currently no libpython in conan center index
-        "python": PythonSetting.OFF,
+        "python": PythonOption.OFF,
     }
-    generators = "cmake_find_package"
+    generators = ("cmake_find_package",)
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -49,6 +49,7 @@ class RootConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
+        # Patch ROOT to use Conan SQLITE
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
@@ -95,9 +96,7 @@ class RootConan(ConanFile):
                 "pgsql": "OFF",
                 "gfal": "OFF",
                 "tmva-pymva": "OFF",
-                "pyroot": "OFF"
-                if self.options["pyroot"] == PythonSetting.OFF
-                else "ON",
+                "pyroot": "OFF" if self.options["pyroot"] == PythonOption.OFF else "ON",
                 # Tell CMake where to look for Conan provided depedencies
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
