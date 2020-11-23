@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(PackageTest CXX)
 
-
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 find_package(Catch2 REQUIRED)
@@ -16,14 +15,11 @@ ROOT_GENERATE_DICTIONARY(G__Event Particle.hpp Event.hpp OPTIONS -inlineInputHea
 add_library(Event SHARED Particle.cpp Event.cpp G__Event.cxx)
 # target_link_libraries(Event)
 
-add_executable(example_targets example.cpp)
+add_executable(example example.cpp)
 target_link_libraries(example_targets Event ROOT::Core ROOT::Hist ROOT::Tree ROOT::Physics ROOT::Thread)
 
-add_executable(example_vars example.cpp)
-target_link_libraries(example_vars Event ${ROOT_LIBRARIES})
-
 include(GNUInstallDirs)
-install(TARGETS example_targets example_vars
+install(TARGETS example
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
