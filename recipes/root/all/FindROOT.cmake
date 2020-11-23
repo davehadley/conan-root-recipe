@@ -1,0 +1,9 @@
+
+find_package(ROOT CONFIG REQUIRED)
+
+include(${ROOT_USE_FILE})
+
+# ROOT libraries don't know about Conan libraries
+set(ROOT_LIBRARIES ${ROOT_LIBRARIES} ${CONAN_LIBS_ROOT})
+set(ROOT_INCLUDE_DIR ${ROOT_INCLUDE_DIR} ${CONAN_INCLUDE_DIRS_ROOT})
+set(ROOT_FOUND TRUE)

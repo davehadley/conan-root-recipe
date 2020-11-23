@@ -7,7 +7,7 @@ include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 find_package(Catch2 REQUIRED)
 include_directories(${Catch2_INCLUDE_DIRS})
 
-find_package(ROOT CONFIG REQUIRED)
+find_package(ROOT REQUIRED)
 include(${ROOT_USE_FILE})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -32,6 +32,10 @@ install(TARGETS example_targets example_vars
 
 # CTest is a testing tool that can be used to test your project.
 # enable_testing()
-# add_test(NAME example
-#          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-#          COMMAND example)
+add_test(NAME example_targets
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+         COMMAND example_targets)
+
+add_test(NAME example_vars
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+         COMMAND example_vars)
