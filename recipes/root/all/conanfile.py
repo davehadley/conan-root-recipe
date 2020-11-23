@@ -3,6 +3,15 @@ import os
 from conans import CMake, ConanFile, tools
 
 
+class PythonSetting:
+    OFF = "off"
+    SYSTEM = "system"
+    # in future we may allow the user to specify a version...
+
+    ALL = [OFF, SYSTEM]
+    DEFAULT = OFF
+
+
 class RootConan(ConanFile):
     name = "root"
     version = "v6-22-02"
@@ -14,13 +23,13 @@ class RootConan(ConanFile):
     description = "CERN ROOT data analysis framework."
     topics = ("data-analysis", "physics")
     settings = ("os", "compiler", "build_type", "arch")
-    options = {"shared": [True], "pyroot": [True, False]}
+    options = {"shared": [True, False], "python": PythonSetting.ALL}
     default_options = {
         "shared": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
         # default pyroot to off as there is currently no libpython in conan center index
-        "pyroot": False,
+        "python": PythonSetting.ALL,
     }
     generators = "cmake_find_package"
     requires = (
@@ -86,7 +95,9 @@ class RootConan(ConanFile):
                 "pgsql": "OFF",
                 "gfal": "OFF",
                 "tmva-pymva": "OFF",
-                "pyroot": "ON" if self.options["pyroot"] else "OFF",
+                "pyroot": "OFF"
+                if self.options["pyroot"] == PythonSetting.OFF
+                else "ON",
                 # Tell CMake where to look for Conan provided depedencies
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
