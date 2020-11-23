@@ -5,7 +5,7 @@ from conans import CMake, ConanFile, tools
 
 class RootTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = ("cmake_find_package",)
+    generators = ("cmake_paths", "cmake_find_package")
     requires = ("catch2/2.13.3",)
 
     def build(self):

@@ -13,23 +13,22 @@ class RootConan(ConanFile):
     url = "https://github.com/davehadley/conan-root-recipe"  # ROOT itself is located at: https://github.com/root-project/root
     description = "CERN ROOT data analysis framework."
     topics = ("data-analysis", "physics")
-    settings = ("os", "compiler", "build_type", "arch", "cppstd")
-    options = {
-        "shared": [True],
-    }
+    settings = ("os", "compiler", "build_type", "arch")
+    options = {"shared": [True], "pyroot": [True, False]}
     default_options = {
         "shared": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
+        # default pyroot to off as there is currently no libpython in conan center index
+        "pyroot": False,
     }
-    generators = ("cmake_find_package",)
+    generators = "cmake_find_package"
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
         "glu/system",
         "xorg/system",
         "sqlite3/3.33.0",
-        # ROOT docs claims that these are required but it builds without them...
         "libjpeg/9d",
         "libpng/1.6.37",
     )
@@ -58,7 +57,7 @@ class RootConan(ConanFile):
             source_folder=f"root-{version}",
             defs={
                 "fail-on-missing": "ON",
-                "CMAKE_CXX_STANDARD": str(self.settings.cppstd),  # type: ignore
+                "CMAKE_CXX_STANDARD": str(self.settings.compiler.cppstd),  # type: ignore
                 # Prefer builtins where available
                 "builtin_pcre": "ON",
                 "builtin_lzma": "ON",
@@ -87,6 +86,7 @@ class RootConan(ConanFile):
                 "pgsql": "OFF",
                 "gfal": "OFF",
                 "tmva-pymva": "OFF",
+                "pyroot": "ON" if self.options["pyroot"] else "OFF",
                 # Tell CMake where to look for Conan provided depedencies
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
@@ -112,7 +112,7 @@ class RootConan(ConanFile):
     def package_info(self):
         # get this list with root-config --libs
         self.cpp_info.names["cmake_find_package"] = "ROOT"
-        self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.collect_libs(self)
         # self.cpp_info.libs = [
         #     "Core",
         #     "Imt",

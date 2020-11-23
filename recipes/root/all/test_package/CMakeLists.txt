@@ -1,11 +1,14 @@
-cmake_minimum_required(VERSION 3.18.4)
+cmake_minimum_required(VERSION 3.13)
 project(PackageTest CXX)
+
+
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 find_package(Catch2 REQUIRED)
 include_directories(${Catch2_INCLUDE_DIRS})
 
-find_package(root REQUIRED)
 find_package(ROOT REQUIRED)
+find_package(ROOT CONFIG REQUIRED)
 include(${ROOT_USE_FILE})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -15,9 +18,14 @@ add_library(Event SHARED Particle.cpp Event.cpp G__Event.cxx)
 target_link_libraries(Event ${ROOT_LIBRARIES})
 
 add_executable(example example.cpp)
-target_link_libraries(example Event root::root)
+target_link_libraries(example Event ROOT::ROOT)
 
-install(TARGETS example)
+include(GNUInstallDirs)
+install(TARGETS example
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 # CTest is a testing tool that can be used to test your project.
 # enable_testing()
