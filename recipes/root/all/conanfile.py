@@ -29,7 +29,7 @@ class RootConan(ConanFile):
         "libxml2:shared": True,
         "sqlite3:shared": True,
         # default pyroot to off as there is currently no libpython in conan center index
-        "python": PythonSetting.ALL,
+        "python": PythonSetting.OFF,
     }
     generators = "cmake_find_package"
     requires = (
