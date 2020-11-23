@@ -5,8 +5,10 @@ from conans import CMake, ConanFile, tools
 
 class RootTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = ("cmake_paths", "cmake_find_package")
+    generators = ("cmake_paths", "cmake_find_package", "cmake")
     requires = ("catch2/2.13.3",)
+    options = {"shared": [True]}
+    default_options = {"shared": True}
 
     def build(self):
         cmake = CMake(self)
