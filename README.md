@@ -10,3 +10,10 @@ conda env create -f environment.yml
 conda activate conan-root-recipe
 pre-commit install
 ```
+
+Yes that's right, we are using Anaconda to do our Conan package development. It's package managers all the way down.
+
+To test the recipe do:
+```
+cd recipes/root/all && ./dev-build.sh
+```
