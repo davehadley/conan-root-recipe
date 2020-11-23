@@ -41,7 +41,6 @@ class RootConan(ConanFile):
         "libjpeg/9d",
         "libpng/1.6.37",
     )
-    exports_sources = ["FindROOT.cmake"]
 
     @property
     def _rootsrcdir(self) -> str:
@@ -111,41 +110,8 @@ class RootConan(ConanFile):
         self._configure_cmake().build()
 
     def package(self):
-        self.copy("FindROOT.cmake", ".", ".")
         self._configure_cmake().install()
 
-    def _getalllibs(self, dep: str) -> str:
-        return ";".join(
-            self.deps_cpp_info[dep].libs + self.deps_cpp_info[dep].system_libs
-        )
-
-    def _getincludeopt(self, depname: str) -> str:
-        return ";".join(self.deps_cpp_info[depname].include_paths)
-
     def package_info(self):
-        # get this list with root-config --libs
-        self.cpp_info.names["cmake_find_package"] = "ROOT"
+        self.cpp_info.name = "ROOT"
         self.cpp_info.libs = tools.collect_libs(self)
-        # self.cpp_info.libs = [
-        #     "Core",
-        #     "Imt",
-        #     "RIO",
-        #     "Net",
-        #     "Hist",
-        #     "Graf",
-        #     "Graf3d",
-        #     "Gpad",
-        #     "ROOTVecOps",
-        #     "Tree",
-        #     "TreePlayer",
-        #     "Rint",
-        #     "Postscript",
-        #     "Matrix",
-        #     "Physics",
-        #     "MathCore",
-        #     "Thread",
-        #     "MultiProc",
-        #     "ROOTDataFrame",
-        #     "tbb",
-        #     "vdt",
-        # ]
