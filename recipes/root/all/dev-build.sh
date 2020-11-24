@@ -4,9 +4,9 @@
 export CONAN_HOOK_ERROR_LEVEL=40
 
 conan source . --source-folder=/tmp/tmpbuild/source \
-&& conan install . --install-folder=/tmp/tmpbuild/build -scompiler.cppstd=11 \
+&& conan install . --install-folder=/tmp/tmpbuild/build \
 && conan build . --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build \
 && conan package . --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build --package-folder=/tmp/tmpbuild/package \
 && conan export-pkg -f .  testuser/testchannel --package-folder=/tmp/tmpbuild/package \
-&& conan test test_package root/v6-22-02@testuser/testchannel -scompiler.cppstd=11
+&& conan test test_package root/v6-22-02@testuser/testchannel 
 
