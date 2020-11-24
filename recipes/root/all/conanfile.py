@@ -107,6 +107,8 @@ class RootConan(ConanFile):
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
                 # "CMAKE_VERBOSE_MAKEFILE": "ON",
+                # configure install directories
+                "CMAKE_INSTALL_SYSCONFDIR": "res/etc",
             },
         )
         return cmake
@@ -131,16 +133,16 @@ class RootConan(ConanFile):
 
     def package(self):
         # ROOT CMake installs files that Conan center will not allow
-        # self._configure_cmake().install()
+        self._configure_cmake().install()
         self.copy("LICENSE.txt", dst="licenses")
-        self.copy("*.h", "include", "include", keep_path=True)
-        self.copy("*.hxx", "include", "include", keep_path=True)
-        self.copy("*.lib", "lib", "lib", keep_path=True)
-        self.copy("*.so", "lib", "lib", keep_path=True)
-        self.copy("*.a", "lib", "lib", keep_path=True)
-        self.copy("*.dylib", "lib", "lib", keep_path=True)
-        self.copy("*", "bin", "bin", keep_path=False)
-        # self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
+        # self.copy("*.h", "include", "include", keep_path=True)
+        # self.copy("*.hxx", "include", "include", keep_path=True)
+        # self.copy("*.lib", "lib", "lib", keep_path=True)
+        # self.copy("*.so", "lib", "lib", keep_path=True)
+        # self.copy("*.a", "lib", "lib", keep_path=True)
+        # self.copy("*.dylib", "lib", "lib", keep_path=True)
+        # self.copy("*", "bin", "bin", keep_path=False)
+        # # self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
         self.copy("RootMacros.cmake", dst="res/cmake", src="")
 
     def package_info(self):
