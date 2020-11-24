@@ -110,6 +110,28 @@ class RootConan(ConanFile):
                 # configure install directories
                 "CMAKE_INSTALL_SYSCONFDIR": "res/etc",
                 "CMAKE_INSTALL_DATAROOTDIR": "res",
+                "CMAKE_INSTALL_DATADIR": "res",
+                "CMAKE_INSTALL_MANDIR": "res/man",
+                "CMAKE_INSTALL_INFODIR": "res/info",
+                "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
+                "CMAKE_INSTALL_DOCDIR": "res/doc",
+                "DATAROOTDIR": "res",
+                # "CMAKE_INSTALL_BINDIR" : "rec/emacs/site-lisp",          # - user executables (bin)
+                # "CMAKE_INSTALL_LIBDIR" : "rec/",          # - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
+                # "CMAKE_INSTALL_INCLUDEDIR" : "rec/",      # - C/C++ header files (include)
+                "CMAKE_INSTALL_SYSCONFDIR": "rec/etc",  # - read-only single-machine data (etc)
+                "CMAKE_INSTALL_DATAROOTDIR": "rec/share",  # - read-only architecture-independent data (share)
+                "CMAKE_INSTALL_DATADIR": "rec/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
+                "CMAKE_INSTALL_MANDIR": "rec/man",  # - man documentation (DATAROOTDIR/man)
+                "CMAKE_INSTALL_MACRODIR": "rec/macros",  # - ROOT macros (DATAROOTDIR/macros)
+                # "CMAKE_INSTALL_CINTINCDIR" : "rec/cint",      # - CINT include files (LIBDIR/cint)
+                "CMAKE_INSTALL_ICONDIR": "rec/icons",  # - icons (DATAROOTDIR/icons)
+                "CMAKE_INSTALL_SRCDIR": "rec/src",  # - sources (DATAROOTDIR/src)
+                "CMAKE_INSTALL_FONTDIR": "rec/fonts",  # - fonts (DATAROOTDIR/fonts)
+                "CMAKE_INSTALL_DOCDIR": "rec/doc",  # - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+                "CMAKE_INSTALL_TUTDIR": "rec/tutorials",  # - tutorials (DOCDIR/tutorials)
+                "CMAKE_INSTALL_CMAKEDIR": "rec/cmake",  # - cmake modules (DATAROOTDIR/cmake)
+                "CMAKE_INSTALL_ELISPDIR": "rec/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
             },
         )
         return cmake
