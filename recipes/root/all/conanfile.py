@@ -140,9 +140,17 @@ class RootConan(ConanFile):
         self.copy("*.a", "lib", "lib", keep_path=True)
         self.copy("*.dylib", "lib", "lib", keep_path=True)
         self.copy("*", "bin", "bin", keep_path=False)
+        # self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
+        self.copy("RootMacros.cmake", dst="res/cmake", src="")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.builddirs = ["cmake"]
+        self.cpp_info.builddirs = ["res/cmake"]
+        self.cpp_info.build_modules.extend(
+            [
+                # "res/cmake/RootMacros.cmake",
+                "res/cmake/ROOTUseFile.cmake",
+            ]
+        )

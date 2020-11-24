@@ -1,6 +1,6 @@
 import os
 
-from conans import CMake, ConanFile, tools
+from conans import CMake, ConanFile, RunEnvironment, tools
 
 
 class RootTestConan(ConanFile):
@@ -9,9 +9,12 @@ class RootTestConan(ConanFile):
     requires = ("catch2/2.13.3",)
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        env_build = RunEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            self.run("which rootcling")
+            cmake = CMake(self)
+            cmake.configure(defs={"CMAKE_VERBOSE_MAKEFILE": "ON"})
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
