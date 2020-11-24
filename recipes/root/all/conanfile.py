@@ -138,6 +138,7 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
                     "CMAKE_INSTALL_JSROOTDIR": "res/js",
                     "gnuinstall": "ON",
+                    "soversion": "ON",
                 },
             )
             yield cmake
