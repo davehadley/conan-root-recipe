@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from conans import CMake, ConanFile, tools
 
@@ -15,6 +14,7 @@ class PythonOption:
 
 class RootConan(ConanFile):
     name = "root"
+    version = "v6-22-02"
     license = (
         "LGPL-2.1-or-later"  # of ROOT itself, the Conan recipe is under MIT license.
     )
@@ -130,23 +130,16 @@ class RootConan(ConanFile):
         self._configure_cmake().build()
 
     def package(self):
-        self._configure_cmake().install()
-        os.makedirs("licenses", exist_ok=True)
-        shutil.move("LICENSE", "licenses")
-        os.makedirs("res", exist_ok=True)
-        for path in [
-            "emacs",
-            "man",
-            "etc",
-            "geom",
-            "icons",
-            "fonts",
-            "js",
-            "macros",
-            "README",
-            "tutorials",
-        ]:
-            shutil.move("path", "res")
+        # ROOT CMake installs files that Conan center will not allow
+        # self._configure_cmake().install()
+        self.copy("LICENSE.txt", dst="licenses")
+        self.copy("*.h", "include", "include", keep_path=True)
+        self.copy("*.hxx", "include", "include", keep_path=True)
+        self.copy("*.lib", "lib", "lib", keep_path=True)
+        self.copy("*.so", "lib", "lib", keep_path=True)
+        self.copy("*.a", "lib", "lib", keep_path=True)
+        self.copy("*.dylib", "lib", "lib", keep_path=True)
+        self.copy("*", "bin", "bin", keep_path=False)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
