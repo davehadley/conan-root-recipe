@@ -14,7 +14,6 @@ class PythonOption:
 
 class RootConan(ConanFile):
     name = "root"
-    version = "v6-22-02"
     license = (
         "LGPL-2.1-or-later"  # of ROOT itself, the Conan recipe is under MIT license.
     )
