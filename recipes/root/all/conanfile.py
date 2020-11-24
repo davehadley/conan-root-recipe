@@ -1,4 +1,6 @@
 import os
+from contextlib import contextmanager
+from tempfile import TemporaryDirectory
 
 from conans import CMake, ConanFile, tools
 
@@ -66,77 +68,79 @@ class RootConan(ConanFile):
             """,
         )
 
+    @contextmanager
     def _configure_cmake(self) -> CMake:
-        cmake = CMake(self)
-        version = self.version.replace("v", "")
-        cmake.configure(
-            source_folder=f"root-{version}",
-            defs={
-                "fail-on-missing": "ON",
-                "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
-                # Prefer builtins where available
-                "builtin_pcre": "ON",
-                "builtin_lzma": "ON",
-                "builtin_zstd": "ON",
-                "builtin_xxhash": "ON",
-                "builtin_lz4": "ON",
-                "builtin_afterimage": "ON",
-                "builtin_gsl": "ON",
-                "builtin_glew": "ON",
-                "builtin_gl2ps": "ON",
-                "builtin_openssl": "ON",
-                "builtin_fftw3": "ON",
-                "builtin_cfitsio": "ON",
-                "builtin_ftgl": "ON",
-                "builtin_davix": "ON",
-                "builtin_tbb": "ON",
-                "builtin_vdt": "ON",
-                # xrootd doesn't build with builtin openssl.
-                "builtin_xrootd": "OFF",
-                "xrootd": "OFF",
-                # No Conan packages available for these dependencies yet
-                "pythia6": "OFF",
-                "pythia8": "OFF",
-                "mysql": "OFF",
-                "oracle": "OFF",
-                "pgsql": "OFF",
-                "gfal": "OFF",
-                "tmva-pymva": "OFF",
-                "pyroot": self._pyrootopt,
-                # Tell CMake where to look for Conan provided depedencies
-                "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
-                "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
-                # "CMAKE_VERBOSE_MAKEFILE": "ON",
-                # configure install directories
-                # "CMAKE_INSTALL_SYSCONFDIR": "res/etc",
-                # "CMAKE_INSTALL_DATAROOTDIR": "res",
-                # "CMAKE_INSTALL_DATADIR": "res",
-                # "CMAKE_INSTALL_MANDIR": "res/man",
-                "CMAKE_INSTALL_INFODIR": "res/info",
-                "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
-                "CMAKE_INSTALL_DOCDIR": "res/doc",
-                # "DATAROOTDIR": "res",
-                # "CMAKE_INSTALL_BINDIR" : "rec/emacs/site-lisp",          # - user executables (bin)
-                # "CMAKE_INSTALL_LIBDIR" : "rec/",          # - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
-                # "CMAKE_INSTALL_INCLUDEDIR" : "rec/",      # - C/C++ header files (include)
-                "CMAKE_INSTALL_SYSCONFDIR": "res/etc",  # - read-only single-machine data (etc)
-                "CMAKE_INSTALL_DATAROOTDIR": "res/share",  # - read-only architecture-independent data (share)
-                "CMAKE_INSTALL_DATADIR": "res/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
-                "CMAKE_INSTALL_MANDIR": "res/man",  # - man documentation (DATAROOTDIR/man)
-                "CMAKE_INSTALL_MACRODIR": "res/macros",  # - ROOT macros (DATAROOTDIR/macros)
-                # "CMAKE_INSTALL_CINTINCDIR" : "rec/cint",      # - CINT include files (LIBDIR/cint)
-                "CMAKE_INSTALL_ICONDIR": "res/icons",  # - icons (DATAROOTDIR/icons)
-                "CMAKE_INSTALL_SRCDIR": "res/src",  # - sources (DATAROOTDIR/src)
-                "CMAKE_INSTALL_FONTDIR": "res/fonts",  # - fonts (DATAROOTDIR/fonts)
-                "CMAKE_INSTALL_DOCDIR": "res/doc",  # - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
-                "CMAKE_INSTALL_TUTDIR": "res/tutorials",  # - tutorials (DOCDIR/tutorials)
-                "CMAKE_INSTALL_CMAKEDIR": "res/cmake",  # - cmake modules (DATAROOTDIR/cmake)
-                "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
-                "CMAKE_INSTALL_JSROOTDIR": "res/js",
-                "gnuinstall": "ON",
-            },
-        )
-        return cmake
+        with TemporaryDirectory() as cmakeinstalldir:
+            cmake = CMake(self)
+            version = self.version.replace("v", "")
+            cmake.configure(
+                source_folder=f"root-{version}",
+                defs={
+                    "fail-on-missing": "ON",
+                    "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
+                    # Prefer builtins where available
+                    "builtin_pcre": "ON",
+                    "builtin_lzma": "ON",
+                    "builtin_zstd": "ON",
+                    "builtin_xxhash": "ON",
+                    "builtin_lz4": "ON",
+                    "builtin_afterimage": "ON",
+                    "builtin_gsl": "ON",
+                    "builtin_glew": "ON",
+                    "builtin_gl2ps": "ON",
+                    "builtin_openssl": "ON",
+                    "builtin_fftw3": "ON",
+                    "builtin_cfitsio": "ON",
+                    "builtin_ftgl": "ON",
+                    "builtin_davix": "ON",
+                    "builtin_tbb": "ON",
+                    "builtin_vdt": "ON",
+                    # xrootd doesn't build with builtin openssl.
+                    "builtin_xrootd": "OFF",
+                    "xrootd": "OFF",
+                    # No Conan packages available for these dependencies yet
+                    "pythia6": "OFF",
+                    "pythia8": "OFF",
+                    "mysql": "OFF",
+                    "oracle": "OFF",
+                    "pgsql": "OFF",
+                    "gfal": "OFF",
+                    "tmva-pymva": "OFF",
+                    "pyroot": self._pyrootopt,
+                    # Tell CMake where to look for Conan provided depedencies
+                    "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
+                    "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
+                    # "CMAKE_VERBOSE_MAKEFILE": "ON",
+                    # configure install directories
+                    # "CMAKE_INSTALL_SYSCONFDIR": "res/etc",
+                    # "CMAKE_INSTALL_DATAROOTDIR": "res",
+                    # "CMAKE_INSTALL_DATADIR": "res",
+                    # "CMAKE_INSTALL_MANDIR": "res/man",
+                    "CMAKE_INSTALL_INFODIR": "res/info",
+                    "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
+                    "CMAKE_INSTALL_DOCDIR": "res/doc",
+                    # "DATAROOTDIR": "res",
+                    # "CMAKE_INSTALL_BINDIR" : "rec/emacs/site-lisp",          # - user executables (bin)
+                    # "CMAKE_INSTALL_LIBDIR" : "rec/",          # - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
+                    # "CMAKE_INSTALL_INCLUDEDIR" : "rec/",      # - C/C++ header files (include)
+                    "CMAKE_INSTALL_SYSCONFDIR": "res/etc",  # - read-only single-machine data (etc)
+                    "CMAKE_INSTALL_DATAROOTDIR": "res/share",  # - read-only architecture-independent data (share)
+                    "CMAKE_INSTALL_DATADIR": "res/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
+                    "CMAKE_INSTALL_MANDIR": "res/man",  # - man documentation (DATAROOTDIR/man)
+                    "CMAKE_INSTALL_MACRODIR": "res/macros",  # - ROOT macros (DATAROOTDIR/macros)
+                    # "CMAKE_INSTALL_CINTINCDIR" : "rec/cint",      # - CINT include files (LIBDIR/cint)
+                    "CMAKE_INSTALL_ICONDIR": "res/icons",  # - icons (DATAROOTDIR/icons)
+                    "CMAKE_INSTALL_SRCDIR": "res/src",  # - sources (DATAROOTDIR/src)
+                    "CMAKE_INSTALL_FONTDIR": "res/fonts",  # - fonts (DATAROOTDIR/fonts)
+                    "CMAKE_INSTALL_DOCDIR": "res/doc",  # - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+                    "CMAKE_INSTALL_TUTDIR": "res/tutorials",  # - tutorials (DOCDIR/tutorials)
+                    "CMAKE_INSTALL_CMAKEDIR": cmakeinstalldir,  # - cmake modules (DATAROOTDIR/cmake)
+                    "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
+                    "CMAKE_INSTALL_JSROOTDIR": "res/js",
+                    "gnuinstall": "ON",
+                },
+            )
+            yield cmake
 
     @property
     def _CMAKE_CXX_STANDARD(self):
@@ -154,11 +158,13 @@ class RootConan(ConanFile):
             return "ON"
 
     def build(self):
-        self._configure_cmake().build()
+        with self._configure_cmake() as cmake:
+            cmake.build()
 
     def package(self):
         # ROOT CMake installs files that Conan center will not allow
-        self._configure_cmake().install()
+        with self._configure_cmake() as cmake:
+            cmake.install()
         self.copy("LICENSE.txt", dst="licenses")
         # self.copy("*.h", "include", "include", keep_path=True)
         # self.copy("*.hxx", "include", "include", keep_path=True)
