@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from conans import CMake, ConanFile, tools
 
@@ -18,13 +19,19 @@ class RootConan(ConanFile):
         "LGPL-2.1-or-later"  # of ROOT itself, the Conan recipe is under MIT license.
     )
     homepage = "https://root.cern/"
-    url = "https://github.com/davehadley/conan-root-recipe"  # ROOT itself is located at: https://github.com/root-project/root
+    url = "https://github.com/conan-io/conan-center-index"  # ROOT itself is located at: https://github.com/root-project/root
     description = "CERN ROOT data analysis framework."
     topics = ("data-analysis", "physics")
     settings = ("os", "compiler", "build_type", "arch")
-    options = {"shared": [True, False], "python": PythonOption.ALL}
+    options = {
+        # don't allow static build as it is not supported (see: https://sft.its.cern.ch/jira/browse/ROOT-6446)
+        "shared": [True],
+        "fPIC": [True, False],
+        "python": PythonOption.ALL,
+    }
     default_options = {
         "shared": True,
+        "fPIC": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
         # default pyroot to off as there is currently no libpython in conan center index
@@ -66,7 +73,7 @@ class RootConan(ConanFile):
             source_folder=f"root-{version}",
             defs={
                 "fail-on-missing": "ON",
-                "CMAKE_CXX_STANDARD": str(self.settings.compiler.cppstd),  # type: ignore
+                "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
                 # Prefer builtins where available
                 "builtin_pcre": "ON",
                 "builtin_lzma": "ON",
@@ -95,7 +102,7 @@ class RootConan(ConanFile):
                 "pgsql": "OFF",
                 "gfal": "OFF",
                 "tmva-pymva": "OFF",
-                "pyroot": "OFF" if self.options["pyroot"] == PythonOption.OFF else "ON",
+                "pyroot": self._pyrootopt,
                 # Tell CMake where to look for Conan provided depedencies
                 "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                 "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
@@ -104,12 +111,46 @@ class RootConan(ConanFile):
         )
         return cmake
 
+    @property
+    def _CMAKE_CXX_STANDARD(self):
+        compileropt = self.settings.compiler.cppstd
+        print(f"DEBUG {compileropt}, {type(compileropt)}")
+        if compileropt:
+            return str(compileropt)
+        else:
+            return "11"
+
+    @property
+    def _pyrootopt(self):
+        if self.options["python"] == PythonOption.OFF:
+            return "OFF"
+        else:
+            return "ON"
+
     def build(self):
         self._configure_cmake().build()
 
     def package(self):
         self._configure_cmake().install()
+        os.makedirs("licenses", exist_ok=True)
+        shutil.move("LICENSE", "licenses")
+        os.makedirs("res", exist_ok=True)
+        for path in [
+            "emacs",
+            "man",
+            "etc",
+            "geom",
+            "icons",
+            "fonts",
+            "js",
+            "macros",
+            "README",
+            "tutorials",
+        ]:
+            shutil.move("path", "res")
 
     def package_info(self):
-        self.cpp_info.name = "ROOT"
+        self.cpp_info.names["cmake_find_package"] = "ROOT"
+        self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.builddirs = ["cmake"]
