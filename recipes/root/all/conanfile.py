@@ -114,7 +114,6 @@ class RootConan(ConanFile):
     @property
     def _CMAKE_CXX_STANDARD(self):
         compileropt = self.settings.compiler.cppstd
-        print(f"DEBUG {compileropt}, {type(compileropt)}")
         if compileropt:
             return str(compileropt)
         else:
