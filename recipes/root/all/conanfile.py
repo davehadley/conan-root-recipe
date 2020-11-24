@@ -109,6 +109,7 @@ class RootConan(ConanFile):
                 # "CMAKE_VERBOSE_MAKEFILE": "ON",
                 # configure install directories
                 "CMAKE_INSTALL_SYSCONFDIR": "res/etc",
+                "CMAKE_INSTALL_DATAROOTDIR": "res",
             },
         )
         return cmake
