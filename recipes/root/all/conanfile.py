@@ -183,7 +183,7 @@ class RootConan(ConanFile):
         self.cpp_info.builddirs = ["res/cmake"]
         self.cpp_info.build_modules.extend(
             [
-                # "res/cmake/RootMacros.cmake",
-                "res/cmake/ROOTUseFile.cmake",
+                "res/cmake/RootMacros.cmake",
+                # "res/cmake/ROOTUseFile.cmake",
             ]
         )
