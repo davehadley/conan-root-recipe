@@ -49,6 +49,7 @@ class RootConan(ConanFile):
         "sqlite3/3.33.0",
         "libjpeg/9d",
         "libpng/1.6.37",
+        "cfitsio/3.490",
     )
 
     @property
@@ -91,7 +92,7 @@ class RootConan(ConanFile):
                     "builtin_gl2ps": "ON",
                     "builtin_openssl": "ON",
                     "builtin_fftw3": "ON",
-                    "builtin_cfitsio": "ON",
+                    "builtin_cfitsio": "OFF",
                     "builtin_ftgl": "ON",
                     "builtin_davix": "ON",
                     "builtin_tbb": "ON",
