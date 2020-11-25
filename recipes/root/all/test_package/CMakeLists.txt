@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(PackageTest CXX)
 
+set(CMAKE_INSTALL_RPATH $ORIGIN)
+
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 find_package(Catch2 REQUIRED)

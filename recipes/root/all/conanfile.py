@@ -62,6 +62,7 @@ class RootConan(ConanFile):
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
+            set(CMAKE_INSTALL_RPATH $ORIGIN)
             find_package(SQLite3 REQUIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
             set(SQLITE_LIBRARIES SQLite::SQLite)
@@ -139,6 +140,7 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_JSROOTDIR": "res/js",
                     "gnuinstall": "ON",
                     "soversion": "ON",
+                    "rpath": "ON",
                 },
             )
             yield cmake
@@ -180,7 +182,7 @@ class RootConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.collect_libs(self) + ["libtbb.so.2"]
         self.cpp_info.builddirs = ["res/cmake"]
         self.cpp_info.build_modules.extend(
             [
