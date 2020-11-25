@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # following: https://docs.conan.io/en/latest/developing_packages/package_dev_flow.html
 
-export CONAN_HOOK_ERROR_LEVEL=40
+# export CONAN_HOOK_ERROR_LEVEL=40
+unset CONAN_HOOK_ERROR_LEVEL
 
 conan source . --source-folder=/tmp/tmpbuild/source \
 && conan install . --install-folder=/tmp/tmpbuild/build \

@@ -132,6 +132,7 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_JSROOTDIR": "res/js",
                     "gnuinstall": "ON",
                     "soversion": "ON",
+                    "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
             yield cmake
