@@ -1,6 +1,7 @@
 import os
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
+from typing import List
 
 from conans import CMake, ConanFile, tools
 
@@ -182,7 +183,12 @@ class RootConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
-        self.cpp_info.libs = tools.collect_libs(self) + ["libtbb.so.2"]
+        libs = tools.collect_libs(self)
+        # special treatment for tbb (to handle issue https://github.com/conan-io/conan/issues/5428)
+        libs = self._fix_tbb_libs(libs)
+        print(f"DEBUG {libs}")
+        # raise Exception
+        self.cpp_info.libs = libs
         self.cpp_info.builddirs = ["res/cmake"]
         self.cpp_info.build_modules.extend(
             [
@@ -190,3 +196,6 @@ class RootConan(ConanFile):
                 # "res/cmake/ROOTUseFile.cmake",
             ]
         )
+
+    def _fix_tbb_libs(self, libs: List[str]) -> List[str]:
+        return [(("lib" + name + ".so.2") if "tbb" in name else name) for name in libs]
