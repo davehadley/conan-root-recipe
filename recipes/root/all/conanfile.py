@@ -63,7 +63,6 @@ class RootConan(ConanFile):
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
-            set(CMAKE_INSTALL_RPATH $ORIGIN)
             find_package(SQLite3 REQUIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
             set(SQLITE_LIBRARIES SQLite::SQLite)
@@ -114,17 +113,9 @@ class RootConan(ConanFile):
                     "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
                     # "CMAKE_VERBOSE_MAKEFILE": "ON",
                     # configure install directories
-                    # "CMAKE_INSTALL_SYSCONFDIR": "res/etc",
-                    # "CMAKE_INSTALL_DATAROOTDIR": "res",
-                    # "CMAKE_INSTALL_DATADIR": "res",
-                    # "CMAKE_INSTALL_MANDIR": "res/man",
                     "CMAKE_INSTALL_INFODIR": "res/info",
                     "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
                     "CMAKE_INSTALL_DOCDIR": "res/doc",
-                    # "DATAROOTDIR": "res",
-                    # "CMAKE_INSTALL_BINDIR" : "rec/emacs/site-lisp",          # - user executables (bin)
-                    # "CMAKE_INSTALL_LIBDIR" : "rec/",          # - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
-                    # "CMAKE_INSTALL_INCLUDEDIR" : "rec/",      # - C/C++ header files (include)
                     "CMAKE_INSTALL_SYSCONFDIR": "res/etc",  # - read-only single-machine data (etc)
                     "CMAKE_INSTALL_DATAROOTDIR": "res/share",  # - read-only architecture-independent data (share)
                     "CMAKE_INSTALL_DATADIR": "res/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
@@ -141,7 +132,6 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_JSROOTDIR": "res/js",
                     "gnuinstall": "ON",
                     "soversion": "ON",
-                    "rpath": "ON",
                 },
             )
             yield cmake
