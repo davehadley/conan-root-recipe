@@ -146,7 +146,7 @@ class RootConan(ConanFile):
 
     @property
     def _pyrootopt(self):
-        if self.options["python"] == PythonOption.OFF:
+        if self.options.python == PythonOption.OFF:
             return "OFF"
         else:
             return "ON"
