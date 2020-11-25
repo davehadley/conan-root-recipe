@@ -37,6 +37,9 @@ class RootConan(ConanFile):
         "fPIC": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
+        "cfitsio:shared": True,
+        "libcurl:shared": True,
+        "openssl:shared": True,
         # default pyroot to off as there is currently no libpython in conan center index
         "python": PythonOption.OFF,
     }
@@ -50,6 +53,8 @@ class RootConan(ConanFile):
         "libjpeg/9d",
         "libpng/1.6.37",
         "cfitsio/3.490",
+        "libcurl/7.73.0",
+        "openssl/1.1.1h",
     )
 
     @property
@@ -90,7 +95,7 @@ class RootConan(ConanFile):
                     "builtin_gsl": "ON",
                     "builtin_glew": "ON",
                     "builtin_gl2ps": "ON",
-                    "builtin_openssl": "ON",
+                    "builtin_openssl": "OFF",
                     "builtin_fftw3": "ON",
                     "builtin_cfitsio": "OFF",
                     "builtin_ftgl": "ON",
