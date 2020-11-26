@@ -77,8 +77,11 @@ class RootConan(ConanFile):
             """,
         )
         # Fix execute permissions on scripts
-        scripts = glob("**/configure", recursive=True)
-        assert len(scripts) == 3
+        scripts = [
+            filename
+            for pattern in ("**/configure", "**/*.sh", "**/*.csh", "**/*.bat")
+            for filename in glob(pattern, recursive=True)
+        ]
         for s in scripts:
             self._make_file_executable(s)
 
