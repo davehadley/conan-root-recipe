@@ -1,5 +1,7 @@
 import os
+import stat
 from contextlib import contextmanager
+from glob import glob
 from tempfile import TemporaryDirectory
 from typing import List
 
@@ -63,7 +65,7 @@ class RootConan(ConanFile):
         return f"root-{version}"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
+        tools.get(**self.conan_data["sources"][self.version])
         # Patch ROOT to use Conan SQLITE
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
@@ -74,6 +76,15 @@ class RootConan(ConanFile):
             set(SQLITE_LIBRARIES SQLite::SQLite)
             """,
         )
+        # Fix execute permissions on scripts
+        scripts = glob("**/configure", recursive=True)
+        assert len(scripts) == 3
+        for s in scripts:
+            self._make_file_executable(s)
+
+    def _make_file_executable(self, filename):
+        st = os.stat(filename)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
     @contextmanager
     def _configure_cmake(self) -> CMake:
