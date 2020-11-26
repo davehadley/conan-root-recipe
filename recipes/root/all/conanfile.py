@@ -174,8 +174,9 @@ class RootConan(ConanFile):
         # self.copy("*.a", "lib", "lib", keep_path=True)
         # self.copy("*.dylib", "lib", "lib", keep_path=True)
         # self.copy("*", "bin", "bin", keep_path=False)
-        # # self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
+        self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
         self.copy("RootMacros.cmake", dst="res/cmake", src="")
+        self.copy("RootTestDriver.cmake", dst="res/cmake", src="")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
