@@ -54,9 +54,9 @@ class RootConan(ConanFile):
         "sqlite3/3.33.0",
         "libjpeg/9d",
         "libpng/1.6.37",
-        "cfitsio/3.490",
-        "libcurl/7.73.0",
-        "openssl/1.1.1h",
+        # "cfitsio/3.490",
+        # "libcurl/7.73.0",
+        # "openssl/1.1.1h",
     )
 
     @property
@@ -109,9 +109,9 @@ class RootConan(ConanFile):
                     "builtin_gsl": "ON",
                     "builtin_glew": "ON",
                     "builtin_gl2ps": "ON",
-                    "builtin_openssl": "OFF",
+                    "builtin_openssl": "ON",
                     "builtin_fftw3": "ON",
-                    "builtin_cfitsio": "OFF",
+                    "builtin_cfitsio": "ON",
                     "builtin_ftgl": "ON",
                     "builtin_davix": "ON",
                     "builtin_tbb": "ON",
