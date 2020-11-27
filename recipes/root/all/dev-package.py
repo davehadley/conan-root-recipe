@@ -15,13 +15,6 @@ def shell(cmd):
     return check_call(cmd, shell=True)
 
 
-shell("conan source . --source-folder=/tmp/tmpbuild/source")
-shell(
-    "conan install . --install-folder=/tmp/tmpbuild/build -s build_type=Debug --profile=debug"
-)
-shell(
-    "conan build . --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build"
-)
 shell(
     "conan package . --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build --package-folder=/tmp/tmpbuild/package"
 )

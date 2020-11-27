@@ -15,6 +15,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 ROOT_GENERATE_DICTIONARY(G__Event Particle.hpp Event.hpp OPTIONS -inlineInputHeader LINKDEF EventLinkDef.h )
 
 add_library(Event SHARED Particle.cpp Event.cpp G__Event.cxx)
+#add_library(Event SHARED Particle.cpp Event.cpp)
 target_link_libraries(Event ROOT::ROOT)
 
 add_executable(example example.cpp)

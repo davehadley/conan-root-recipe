@@ -130,23 +130,23 @@ class RootConan(ConanFile):
                     "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
                     # "CMAKE_VERBOSE_MAKEFILE": "ON",
                     # configure install directories
-                    "CMAKE_INSTALL_INFODIR": "res/info",
-                    "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
-                    "CMAKE_INSTALL_DOCDIR": "res/doc",
-                    "CMAKE_INSTALL_SYSCONFDIR": "res/etc",  # - read-only single-machine data (etc)
-                    "CMAKE_INSTALL_DATAROOTDIR": "res/share",  # - read-only architecture-independent data (share)
-                    "CMAKE_INSTALL_DATADIR": "res/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
-                    "CMAKE_INSTALL_MANDIR": "res/man",  # - man documentation (DATAROOTDIR/man)
-                    "CMAKE_INSTALL_MACRODIR": "res/macros",  # - ROOT macros (DATAROOTDIR/macros)
-                    # "CMAKE_INSTALL_CINTINCDIR" : "rec/cint",      # - CINT include files (LIBDIR/cint)
-                    "CMAKE_INSTALL_ICONDIR": "res/icons",  # - icons (DATAROOTDIR/icons)
-                    "CMAKE_INSTALL_SRCDIR": "res/src",  # - sources (DATAROOTDIR/src)
-                    "CMAKE_INSTALL_FONTDIR": "res/fonts",  # - fonts (DATAROOTDIR/fonts)
-                    "CMAKE_INSTALL_DOCDIR": "res/doc",  # - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
-                    "CMAKE_INSTALL_TUTDIR": "res/tutorials",  # - tutorials (DOCDIR/tutorials)
+                    # "CMAKE_INSTALL_INFODIR": "res/info",
+                    # "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
+                    # "CMAKE_INSTALL_DOCDIR": "res/doc",
+                    # "CMAKE_INSTALL_SYSCONFDIR": "res/etc",  # - read-only single-machine data (etc)
+                    # "CMAKE_INSTALL_DATAROOTDIR": "res/share",  # - read-only architecture-independent data (share)
+                    # "CMAKE_INSTALL_DATADIR": "res/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
+                    # "CMAKE_INSTALL_MANDIR": "res/man",  # - man documentation (DATAROOTDIR/man)
+                    # "CMAKE_INSTALL_MACRODIR": "res/macros",  # - ROOT macros (DATAROOTDIR/macros)
+                    # # "CMAKE_INSTALL_CINTINCDIR" : "rec/cint",      # - CINT include files (LIBDIR/cint)
+                    # "CMAKE_INSTALL_ICONDIR": "res/icons",  # - icons (DATAROOTDIR/icons)
+                    # "CMAKE_INSTALL_SRCDIR": "res/src",  # - sources (DATAROOTDIR/src)
+                    # "CMAKE_INSTALL_FONTDIR": "res/fonts",  # - fonts (DATAROOTDIR/fonts)
+                    # "CMAKE_INSTALL_DOCDIR": "res/doc",  # - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+                    # "CMAKE_INSTALL_TUTDIR": "res/tutorials",  # - tutorials (DOCDIR/tutorials)
                     "CMAKE_INSTALL_CMAKEDIR": cmakeinstalldir,  # - cmake modules (DATAROOTDIR/cmake)
-                    "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
-                    "CMAKE_INSTALL_JSROOTDIR": "res/js",
+                    # "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
+                    # "CMAKE_INSTALL_JSROOTDIR": "res/js",
                     "gnuinstall": "OFF",
                     "soversion": "ON",
                     "CMAKE_VERBOSE_MAKEFILE": "ON",
@@ -205,6 +205,7 @@ class RootConan(ConanFile):
                 # "res/cmake/ROOTUseFile.cmake",
             ]
         )
+        self.cpp_info.resdirs = ["res", "etc", "geom", "config", "cmake"]
 
     def _fix_tbb_libs(self, libs: List[str]) -> List[str]:
         return [(("lib" + name + ".so.2") if "tbb" in name else name) for name in libs]
