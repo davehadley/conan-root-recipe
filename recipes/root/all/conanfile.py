@@ -54,9 +54,6 @@ class RootConan(ConanFile):
         "sqlite3/3.33.0",
         "libjpeg/9d",
         "libpng/1.6.37",
-        # "cfitsio/3.490",
-        # "libcurl/7.73.0",
-        # "openssl/1.1.1h",
     )
 
     @property
@@ -150,7 +147,7 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_CMAKEDIR": cmakeinstalldir,  # - cmake modules (DATAROOTDIR/cmake)
                     "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
                     "CMAKE_INSTALL_JSROOTDIR": "res/js",
-                    "gnuinstall": "ON",
+                    "gnuinstall": "OFF",
                     "soversion": "ON",
                     "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
