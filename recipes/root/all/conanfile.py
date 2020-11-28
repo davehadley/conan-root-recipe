@@ -1,8 +1,8 @@
 import os
+import shutil
 import stat
 from contextlib import contextmanager
 from glob import glob
-from tempfile import TemporaryDirectory
 from typing import List
 
 from conans import CMake, ConanFile, tools
@@ -85,62 +85,60 @@ class RootConan(ConanFile):
 
     @contextmanager
     def _configure_cmake(self) -> CMake:
-        with TemporaryDirectory() as cmakeinstalldir:
-            cmake = CMake(self)
-            version = self.version.replace("v", "")
-            cmake.configure(
-                source_folder=f"root-{version}",
-                defs={
-                    "fail-on-missing": "ON",
-                    "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
-                    # Prefer builtins where available
-                    "builtin_pcre": "ON",
-                    "builtin_lzma": "ON",
-                    "builtin_zstd": "ON",
-                    "builtin_xxhash": "ON",
-                    "builtin_lz4": "ON",
-                    "builtin_afterimage": "ON",
-                    "builtin_gsl": "ON",
-                    "builtin_glew": "ON",
-                    "builtin_gl2ps": "ON",
-                    "builtin_openssl": "ON",
-                    "builtin_fftw3": "ON",
-                    "builtin_cfitsio": "ON",
-                    "builtin_ftgl": "ON",
-                    "builtin_davix": "ON",
-                    "builtin_tbb": "ON",
-                    "builtin_vdt": "ON",
-                    # xrootd doesn't build with builtin openssl.
-                    "builtin_xrootd": "OFF",
-                    "xrootd": "OFF",
-                    # No Conan packages available for these dependencies yet
-                    "pythia6": "OFF",
-                    "pythia8": "OFF",
-                    "mysql": "OFF",
-                    "oracle": "OFF",
-                    "pgsql": "OFF",
-                    "gfal": "OFF",
-                    "tmva-pymva": "OFF",
-                    "pyroot": self._pyrootopt,
-                    "gnuinstall": "OFF",
-                    "soversion": "ON",
-                    # Tell CMake where to look for Conan provided depedencies
-                    "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
-                    "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
-                    # Configure install directories
-                    # Conan CCI hooks restrict the allowed install directory
-                    # names but ROOT is very picky about where build/runtime
-                    # resources get installed.
-                    # Set install directories to work around these limitations
-                    # Following: https://github.com/conan-io/conan/issues/3695
-                    "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
-                    "CMAKE_INSTALL_INCLUDEDIR": "../include",
-                    "CMAKE_INSTALL_BINDIR": "../bin",
-                    "CMAKE_INSTALL_LIBDIR": "../lib",
-                    "CMAKE_VERBOSE_MAKEFILE": "ON",
-                },
-            )
-            yield cmake
+        cmake = CMake(self)
+        version = self.version.replace("v", "")
+        cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
+        cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
+        cmake.configure(
+            source_folder=f"root-{version}",
+            defs={
+                "fail-on-missing": "ON",
+                "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
+                # Prefer builtins where available
+                "builtin_pcre": "ON",
+                "builtin_lzma": "ON",
+                "builtin_zstd": "ON",
+                "builtin_xxhash": "ON",
+                "builtin_lz4": "ON",
+                "builtin_afterimage": "ON",
+                "builtin_gsl": "ON",
+                "builtin_glew": "ON",
+                "builtin_gl2ps": "ON",
+                "builtin_openssl": "ON",
+                "builtin_fftw3": "ON",
+                "builtin_cfitsio": "ON",
+                "builtin_ftgl": "ON",
+                "builtin_davix": "ON",
+                "builtin_tbb": "ON",
+                "builtin_vdt": "ON",
+                # xrootd doesn't build with builtin openssl.
+                "builtin_xrootd": "OFF",
+                "xrootd": "OFF",
+                # No Conan packages available for these dependencies yet
+                "pythia6": "OFF",
+                "pythia8": "OFF",
+                "mysql": "OFF",
+                "oracle": "OFF",
+                "pgsql": "OFF",
+                "gfal": "OFF",
+                "tmva-pymva": "OFF",
+                "pyroot": self._pyrootopt,
+                "gnuinstall": "OFF",
+                "soversion": "ON",
+                # Tell CMake where to look for Conan provided depedencies
+                "CMAKE_LIBRARY_PATH": cmakelibpath,
+                "CMAKE_INCLUDE_PATH": cmakeincludepath,
+                # Configure install directories
+                # Conan CCI hooks restrict the allowed install directory
+                # names but ROOT is very picky about where build/runtime
+                # resources get installed.
+                # Set install directories to work around these limitations
+                # Following: https://github.com/conan-io/conan/issues/3695
+                "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
+                # "CMAKE_VERBOSE_MAKEFILE": "ON",
+            },
+        )
+        yield cmake
 
     @property
     def _CMAKE_CXX_STANDARD(self):
@@ -168,6 +166,10 @@ class RootConan(ConanFile):
         self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
         self.copy("RootMacros.cmake", dst="res/cmake", src="")
         self.copy("RootTestDriver.cmake", dst="res/cmake", src="")
+        for dir in ["include", "lib", "bin"]:
+            shutil.move(
+                f"{self.package_folder}/res/{dir}", f"{self.package_folder}/{dir}"
+            )
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
