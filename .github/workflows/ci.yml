@@ -23,7 +23,7 @@ jobs:
       - name: Setup Conan
         run: source setup-venv.sh && conan profile new default --detect
       - name: Build
-        run: source setup-venv.sh && conan create recipes/root/all root/v6-22-02@
+        run: source setup-venv.sh && ./test-build.sh
       - name: black
         run: source setup-venv.sh && black --check recipes
       - name: flake8
