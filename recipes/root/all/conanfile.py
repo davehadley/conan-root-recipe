@@ -142,7 +142,6 @@ class RootConan(ConanFile):
                 # Set install prefix to work around these limitations
                 # Following: https://github.com/conan-io/conan/issues/3695
                 "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
-                # "CMAKE_VERBOSE_MAKEFILE": "ON",
             },
         )
         yield cmake

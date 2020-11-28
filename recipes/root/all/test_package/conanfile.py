@@ -11,10 +11,6 @@ class RootTestConan(ConanFile):
     def build(self):
         env_build = RunEnvironment(self)
         with tools.environment_append(env_build.vars):
-            self.run("which rootcling")
-            self.run("echo ROOTSYS is $ROOTSYS")
-            self.run("pwd")
-            self.run("echo ${LD_LIBRARY_PATH}")
             cmake = CMake(self)
             cmake.configure(defs={"CMAKE_VERBOSE_MAKEFILE": "ON"})
             cmake.build()
