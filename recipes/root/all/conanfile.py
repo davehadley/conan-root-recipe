@@ -134,9 +134,9 @@ class RootConan(ConanFile):
                     # Set install directories to work around these limitations
                     # Following: https://github.com/conan-io/conan/issues/3695
                     "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
-                    "CMAKE_INSTALL_FULL_INCLUDEDIR": f"{self.package_folder}/include",
-                    "CMAKE_INSTALL_FULL_BINDIR": f"{self.package_folder}/bin",
-                    "CMAKE_INSTALL_FULL_LIBDIR": f"{self.package_folder}/lib",
+                    "CMAKE_INSTALL_INCLUDEDIR": "../include",
+                    "CMAKE_INSTALL_BINDIR": "../bin",
+                    "CMAKE_INSTALL_LIBDIR": "../lib",
                     "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
