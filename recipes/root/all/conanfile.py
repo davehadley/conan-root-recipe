@@ -53,6 +53,7 @@ class RootConan(ConanFile):
         "libjpeg/9d",
         "libpng/1.6.37",
         "libcurl/7.73.0",
+        "libuuid/1.0.3",
     )
 
     @property
