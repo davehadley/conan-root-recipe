@@ -14,7 +14,6 @@ class RootTestConan(ConanFile):
             self.run("which rootcling")
             self.run("echo ROOTSYS is $ROOTSYS")
             self.run("pwd")
-            print(f"DEBUG {env_build.vars}")
             self.run("echo ${LD_LIBRARY_PATH}")
             cmake = CMake(self)
             cmake.configure(defs={"CMAKE_VERBOSE_MAKEFILE": "ON"})
