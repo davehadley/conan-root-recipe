@@ -27,14 +27,16 @@ class RootConan(ConanFile):
     topics = ("data-analysis", "physics")
     settings = ("os", "compiler", "build_type", "arch")
     options = {
-        # don't allow static build as it is not supported
+        # Don't allow static build as it is not supported
         # see: https://sft.its.cern.ch/jira/browse/ROOT-6446
-        "shared": [True],
+        # TODO: shared option should be reinstated when hooks issue is resolved
+        # (see: https://github.com/conan-io/hooks/issues/252)
+        # "shared": [True],
         "fPIC": [True, False],
         "python": PythonOption.ALL,
     }
     default_options = {
-        "shared": True,
+        # "shared": True,
         "fPIC": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
@@ -91,6 +93,9 @@ class RootConan(ConanFile):
         cmake.configure(
             source_folder=f"root-{version}",
             defs={
+                # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
+                # (see: https://github.com/conan-io/hooks/issues/252)
+                "BUILD_SHARED_LIBS": "ON",
                 "fail-on-missing": "ON",
                 "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
                 # Prefer builtins where available
