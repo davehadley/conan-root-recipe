@@ -53,7 +53,7 @@ class RootConan(ConanFile):
         "libjpeg/9d",
         "libpng/1.6.37",
         "libcurl/7.73.0",
-        "libuuid/1.0.3",
+        # "libuuid/1.0.3",
     )
 
     @property
@@ -114,13 +114,14 @@ class RootConan(ConanFile):
                 "builtin_fftw3": "ON",
                 "builtin_cfitsio": "ON",
                 "builtin_ftgl": "ON",
-                "builtin_davix": "ON",
+                "builtin_davix": "OFF",
                 "builtin_tbb": "ON",
                 "builtin_vdt": "ON",
                 # xrootd doesn't build with builtin openssl.
                 "builtin_xrootd": "OFF",
                 "xrootd": "OFF",
                 # No Conan packages available for these dependencies yet
+                "davix": "OFF",
                 "pythia6": "OFF",
                 "pythia8": "OFF",
                 "mysql": "OFF",
