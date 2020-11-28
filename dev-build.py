@@ -15,15 +15,15 @@ def shell(cmd):
     return check_call(cmd, shell=True)
 
 
-shell("conan source . --source-folder=/tmp/tmpbuild/source")
-shell("conan install . --install-folder=/tmp/tmpbuild/build")
+shell("conan source recipes/root/all --source-folder=/tmp/tmpbuild/source")
+shell("conan install recipes/root/all --install-folder=/tmp/tmpbuild/build")
 shell(
-    "conan build . --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build"
+    "conan build recipes/root/all --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build"
 )
 shell(
-    "conan package . --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build --package-folder=/tmp/tmpbuild/package"
+    "conan package recipes/root/all --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build --package-folder=/tmp/tmpbuild/package"
 )
 shell(
-    "conan export-pkg -f .  testuser/testchannel --package-folder=/tmp/tmpbuild/package"
+    "conan export-pkg -f recipes/root/all  testuser/testchannel --package-folder=/tmp/tmpbuild/package"
 )
-shell("conan test test_package root/v6-22-02@testuser/testchannel")
+shell("conan test recipes/root/all/test_package root/v6-22-02@testuser/testchannel")
