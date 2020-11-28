@@ -169,6 +169,8 @@ class RootConan(ConanFile):
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
         for cmakefile in glob(f"{self.package_folder}/res/cmake/*Config*.cmake"):
             os.remove(cmakefile)
+        # Fix for CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)
+        os.remove(f"{self.package_folder}/res/tutorials/CTestCustom.cmake")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
