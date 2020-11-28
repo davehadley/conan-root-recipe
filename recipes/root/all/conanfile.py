@@ -177,7 +177,7 @@ class RootConan(ConanFile):
         for dir in ["include", "lib", "bin"]:
             os.symlink(
                 f"{self.package_folder}{os.sep}res{os.sep}{dir}",
-                f"{self.package_folder}/{dir}",
+                f"{self.package_folder}{os.sep}{dir}",
             )
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
         for cmakefile in glob(
@@ -195,7 +195,7 @@ class RootConan(ConanFile):
         libs = tools.collect_libs(self)
         libs = self._fix_tbb_libs(libs)
         self.cpp_info.libs = libs
-        self.cpp_info.builddirs = ["res{os.sep}cmake"]
+        self.cpp_info.builddirs = [f"res{os.sep}cmake"]
         self.cpp_info.build_modules.extend(
             [
                 f"res{os.sep}cmake{os.sep}RootMacros.cmake",
