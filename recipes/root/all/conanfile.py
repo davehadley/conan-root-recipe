@@ -130,16 +130,16 @@ class RootConan(ConanFile):
                     # Tell CMake where to look for Conan provided depedencies
                     "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                     "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
-                    # configure install directories
+                    # Configure install directories
                     # Conan CCI hooks restrict the allowed install directory 
                     # names but ROOT is very picky about where build/runtime
                     # resources get installed
                     # We need to need to work around these limitations!
                     # Suggested on : https://github.com/conan-io/conan/issues/3695
                     "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
-                    "CMAKE_INSTALL_INCLUDEDIR": f"{self.package_folder}/include",
-                    "CMAKE_INSTALL_BINDIR": f"{self.package_folder}/bin",
-                    "CMAKE_INSTALL_LIBDIR": f"{self.package_folder}/lib",
+                    "CMAKE_INSTALL_FULL_INCLUDEDIR": f"{self.package_folder}/include",
+                    "CMAKE_INSTALL_FULL_BINDIR": f"{self.package_folder}/bin",
+                    "CMAKE_INSTALL_FULL_LIBDIR": f"{self.package_folder}/lib",
                     "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
