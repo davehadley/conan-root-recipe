@@ -1,5 +1,4 @@
 import os
-import shutil
 import stat
 from contextlib import contextmanager
 from glob import glob
@@ -163,13 +162,13 @@ class RootConan(ConanFile):
         with self._configure_cmake() as cmake:
             cmake.install()
         self.copy("LICENSE.txt", dst="licenses")
-        self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
-        self.copy("RootMacros.cmake", dst="res/cmake", src="")
-        self.copy("RootTestDriver.cmake", dst="res/cmake", src="")
         for dir in ["include", "lib", "bin"]:
-            shutil.move(
+            os.symlink(
                 f"{self.package_folder}/res/{dir}", f"{self.package_folder}/{dir}"
             )
+        # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
+        for cmakefile in glob(f"{self.package_folder}/res/cmake/*Config*.cmake"):
+            os.remove(cmakefile)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
