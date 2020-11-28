@@ -132,7 +132,7 @@ class RootConan(ConanFile):
                 # Conan CCI hooks restrict the allowed install directory
                 # names but ROOT is very picky about where build/runtime
                 # resources get installed.
-                # Set install directories to work around these limitations
+                # Set install prefix to work around these limitations
                 # Following: https://github.com/conan-io/conan/issues/3695
                 "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
                 # "CMAKE_VERBOSE_MAKEFILE": "ON",
