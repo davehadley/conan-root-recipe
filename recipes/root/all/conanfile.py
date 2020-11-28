@@ -193,7 +193,7 @@ class RootConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         libs = tools.collect_libs(self)
-        # libs = self._fix_tbb_libs(libs)
+        libs = self._fix_tbb_libs(libs)
         self.cpp_info.libs = libs
         self.cpp_info.builddirs = ["res{os.sep}cmake"]
         self.cpp_info.build_modules.extend(
