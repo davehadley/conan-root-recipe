@@ -52,6 +52,7 @@ class RootConan(ConanFile):
         "sqlite3/3.33.0",
         "libjpeg/9d",
         "libpng/1.6.37",
+        "libcurl/7.73.0",
     )
 
     @property
