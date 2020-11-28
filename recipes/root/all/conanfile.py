@@ -125,32 +125,21 @@ class RootConan(ConanFile):
                     "gfal": "OFF",
                     "tmva-pymva": "OFF",
                     "pyroot": self._pyrootopt,
+                    "gnuinstall": "OFF",
+                    "soversion": "ON",
                     # Tell CMake where to look for Conan provided depedencies
                     "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                     "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
-                    # "CMAKE_VERBOSE_MAKEFILE": "ON",
                     # configure install directories
-                    "CMAKE_INSTALL_PREFIX": "%s/res"
-                    % self.package_folder,  # suggested on : https://github.com/conan-io/conan/issues/3695
-                    # "CMAKE_INSTALL_INFODIR": "res/info",
-                    # "CMAKE_INSTALL_LOCALEDIR": "res/localedir",
-                    # "CMAKE_INSTALL_DOCDIR": "res/doc",
-                    # "CMAKE_INSTALL_SYSCONFDIR": "res/etc",  # - read-only single-machine data (etc)
-                    # "CMAKE_INSTALL_DATAROOTDIR": "res/share",  # - read-only architecture-independent data (share)
-                    # "CMAKE_INSTALL_DATADIR": "res/root",  # - read-only architecture-independent data (DATAROOTDIR/root)
-                    # "CMAKE_INSTALL_MANDIR": "res/man",  # - man documentation (DATAROOTDIR/man)
-                    # "CMAKE_INSTALL_MACRODIR": "res/macros",  # - ROOT macros (DATAROOTDIR/macros)
-                    # # "CMAKE_INSTALL_CINTINCDIR" : "rec/cint",      # - CINT include files (LIBDIR/cint)
-                    # "CMAKE_INSTALL_ICONDIR": "res/icons",  # - icons (DATAROOTDIR/icons)
-                    # "CMAKE_INSTALL_SRCDIR": "res/src",  # - sources (DATAROOTDIR/src)
-                    # "CMAKE_INSTALL_FONTDIR": "res/fonts",  # - fonts (DATAROOTDIR/fonts)
-                    # "CMAKE_INSTALL_DOCDIR": "res/doc",  # - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
-                    # "CMAKE_INSTALL_TUTDIR": "res/tutorials",  # - tutorials (DOCDIR/tutorials)
-                    # "CMAKE_INSTALL_CMAKEDIR": cmakeinstalldir,  # - cmake modules (DATAROOTDIR/cmake)
-                    # "CMAKE_INSTALL_ELISPDIR": "res/emacs/site-lisp",  # - lisp files (DATAROOTDIR/emacs/site-lisp)
-                    # "CMAKE_INSTALL_JSROOTDIR": "res/js",
-                    "gnuinstall": "OFF",
-                    "soversion": "ON",
+                    # Conan CCI hooks restrict the allowed install directory 
+                    # names but ROOT is very picky about where build/runtime
+                    # resources get installed
+                    # We need to need to work around these limitations!
+                    # Suggested on : https://github.com/conan-io/conan/issues/3695
+                    "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
+                    "CMAKE_INSTALL_INCLUDEDIR": f"{self.package_folder}/include",
+                    "CMAKE_INSTALL_BINDIR": f"{self.package_folder}/bin",
+                    "CMAKE_INSTALL_LIBDIR": f"{self.package_folder}/lib",
                     "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
