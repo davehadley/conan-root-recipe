@@ -5,10 +5,10 @@ import os
 from subprocess import check_call
 
 os.environ["CONAN_HOOK_ERROR_LEVEL"] = "40"
-# try:
-#    del os.environ["CONAN_HOOK_ERROR_LEVEL"]
-# except Exception:
-#    pass
+try:
+    del os.environ["CONAN_HOOK_ERROR_LEVEL"]
+except Exception:
+    pass
 
 
 def shell(cmd):
