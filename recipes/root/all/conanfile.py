@@ -184,9 +184,7 @@ class RootConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         libs = tools.collect_libs(self)
-        # Special treatment for tbb
-        # (to handle issue https://github.com/conan-io/conan/issues/5428)
-        libs = self._fix_tbb_libs(libs)
+        # libs = self._fix_tbb_libs(libs)
         self.cpp_info.libs = libs
         self.cpp_info.builddirs = ["res/cmake"]
         self.cpp_info.build_modules.extend(
@@ -198,4 +196,6 @@ class RootConan(ConanFile):
         self.cpp_info.resdirs = ["res"]
 
     def _fix_tbb_libs(self, libs: List[str]) -> List[str]:
+        # Special treatment for tbb
+        # (to handle issue https://github.com/conan-io/conan/issues/5428)
         return [(("lib" + name + ".so.2") if "tbb" in name else name) for name in libs]
