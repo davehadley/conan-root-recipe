@@ -12,7 +12,7 @@ class PythonOption:
     OFF = "off"
     SYSTEM = "system"
     # in future we may allow the user to specify a version when
-    # libPython is available in Conan package center
+    # libPython is available in Conan Center Index.
     ALL = [OFF, SYSTEM]
     DEFAULT = OFF
 
@@ -20,16 +20,16 @@ class PythonOption:
 class RootConan(ConanFile):
     name = "root"
     version = "v6-22-02"
-    license = (
-        "LGPL-2.1-or-later"  # of ROOT itself, the Conan recipe is under MIT license.
-    )
+    license = "LGPL-2.1-or-later"  # of ROOT itself, the recipe is under MIT license.
     homepage = "https://root.cern/"
-    url = "https://github.com/conan-io/conan-center-index"  # ROOT itself is located at: https://github.com/root-project/root
+    # ROOT itself is located at: https://github.com/root-project/root
+    url = "https://github.com/conan-io/conan-center-index"
     description = "CERN ROOT data analysis framework."
     topics = ("data-analysis", "physics")
     settings = ("os", "compiler", "build_type", "arch")
     options = {
-        # don't allow static build as it is not supported (see: https://sft.its.cern.ch/jira/browse/ROOT-6446)
+        # don't allow static build as it is not supported
+        # see: https://sft.its.cern.ch/jira/browse/ROOT-6446
         "shared": [True],
         "fPIC": [True, False],
         "python": PythonOption.ALL,
@@ -39,10 +39,7 @@ class RootConan(ConanFile):
         "fPIC": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
-        "cfitsio:shared": True,
-        "libcurl:shared": True,
-        "openssl:shared": True,
-        # default pyroot to off as there is currently no libpython in conan center index
+        # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
     }
     generators = ("cmake_find_package",)
@@ -131,11 +128,11 @@ class RootConan(ConanFile):
                     "CMAKE_LIBRARY_PATH": ";".join(self.deps_cpp_info.lib_paths),
                     "CMAKE_INCLUDE_PATH": ";".join(self.deps_cpp_info.include_paths),
                     # Configure install directories
-                    # Conan CCI hooks restrict the allowed install directory 
+                    # Conan CCI hooks restrict the allowed install directory
                     # names but ROOT is very picky about where build/runtime
-                    # resources get installed
-                    # We need to need to work around these limitations!
-                    # Suggested on : https://github.com/conan-io/conan/issues/3695
+                    # resources get installed.
+                    # Set install directories to work around these limitations
+                    # Following: https://github.com/conan-io/conan/issues/3695
                     "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
                     "CMAKE_INSTALL_FULL_INCLUDEDIR": f"{self.package_folder}/include",
                     "CMAKE_INSTALL_FULL_BINDIR": f"{self.package_folder}/bin",
