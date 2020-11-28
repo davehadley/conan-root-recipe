@@ -76,7 +76,12 @@ class RootConan(ConanFile):
         # Fix execute permissions on scripts
         scripts = [
             filename
-            for pattern in ("**/configure", "**/*.sh", "**/*.csh", "**/*.bat")
+            for pattern in (
+                f"**{os.sep}configure",
+                f"**{os.sep}*.sh",
+                f"**{os.sep}*.csh",
+                f"**{os.sep}*.bat",
+            )
             for filename in glob(pattern, recursive=True)
         ]
         for s in scripts:
@@ -141,7 +146,7 @@ class RootConan(ConanFile):
                 # resources get installed.
                 # Set install prefix to work around these limitations
                 # Following: https://github.com/conan-io/conan/issues/3695
-                "CMAKE_INSTALL_PREFIX": f"{self.package_folder}/res",
+                "CMAKE_INSTALL_PREFIX": f"{self.package_folder}{os.sep}res",
             },
         )
         yield cmake
@@ -171,13 +176,18 @@ class RootConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses")
         for dir in ["include", "lib", "bin"]:
             os.symlink(
-                f"{self.package_folder}/res/{dir}", f"{self.package_folder}/{dir}"
+                f"{self.package_folder}{os.sep}res{os.sep}{dir}",
+                f"{self.package_folder}/{dir}",
             )
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
-        for cmakefile in glob(f"{self.package_folder}/res/cmake/*Config*.cmake"):
+        for cmakefile in glob(
+            f"{self.package_folder}{os.sep}res{os.sep}cmake{os.sep}*Config*.cmake"
+        ):
             os.remove(cmakefile)
         # Fix for CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)
-        os.remove(f"{self.package_folder}/res/tutorials/CTestCustom.cmake")
+        os.remove(
+            f"{self.package_folder}{os.sep}res{os.sep}tutorials{os.sep}CTestCustom.cmake"
+        )
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
@@ -185,11 +195,11 @@ class RootConan(ConanFile):
         libs = tools.collect_libs(self)
         # libs = self._fix_tbb_libs(libs)
         self.cpp_info.libs = libs
-        self.cpp_info.builddirs = ["res/cmake"]
+        self.cpp_info.builddirs = ["res{os.sep}cmake"]
         self.cpp_info.build_modules.extend(
             [
-                "res/cmake/RootMacros.cmake",
-                # "res/cmake/ROOTUseFile.cmake",
+                f"res{os.sep}cmake{os.sep}RootMacros.cmake",
+                # f"res{os.sep}cmake{os.sep}ROOTUseFile.cmake",
             ]
         )
         self.cpp_info.resdirs = ["res"]
