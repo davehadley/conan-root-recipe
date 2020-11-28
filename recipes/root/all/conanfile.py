@@ -60,7 +60,7 @@ class RootConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        # Patch ROOT to use Conan SQLITE
+        # Patch ROOT CMake to use Conan SQLITE
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
@@ -162,17 +162,9 @@ class RootConan(ConanFile):
             cmake.build()
 
     def package(self):
-        # ROOT CMake installs files that Conan center will not allow
         with self._configure_cmake() as cmake:
             cmake.install()
         self.copy("LICENSE.txt", dst="licenses")
-        # self.copy("*.h", "include", "include", keep_path=True)
-        # self.copy("*.hxx", "include", "include", keep_path=True)
-        # self.copy("*.lib", "lib", "lib", keep_path=True)
-        # self.copy("*.so", "lib", "lib", keep_path=True)
-        # self.copy("*.a", "lib", "lib", keep_path=True)
-        # self.copy("*.dylib", "lib", "lib", keep_path=True)
-        # self.copy("*", "bin", "bin", keep_path=False)
         self.copy("ROOTUseFile.cmake", dst="res/cmake", src="")
         self.copy("RootMacros.cmake", dst="res/cmake", src="")
         self.copy("RootTestDriver.cmake", dst="res/cmake", src="")
@@ -181,10 +173,9 @@ class RootConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         libs = tools.collect_libs(self)
-        # special treatment for tbb (to handle issue https://github.com/conan-io/conan/issues/5428)
+        # Special treatment for tbb
+        # (to handle issue https://github.com/conan-io/conan/issues/5428)
         libs = self._fix_tbb_libs(libs)
-        print(f"DEBUG {libs}")
-        # raise Exception
         self.cpp_info.libs = libs
         self.cpp_info.builddirs = ["res/cmake"]
         self.cpp_info.build_modules.extend(
@@ -193,7 +184,7 @@ class RootConan(ConanFile):
                 # "res/cmake/ROOTUseFile.cmake",
             ]
         )
-        self.cpp_info.resdirs = ["res", "etc", "geom", "config", "cmake"]
+        self.cpp_info.resdirs = ["res"]
 
     def _fix_tbb_libs(self, libs: List[str]) -> List[str]:
         return [(("lib" + name + ".so.2") if "tbb" in name else name) for name in libs]
