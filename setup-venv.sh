@@ -3,7 +3,7 @@ if [ ! -d "venv" ]
 then
     python3 -m venv venv \
     && source venv/bin/activate \
-    && python -m pip install conan;
+    && python -m pip install conan pre-commit isort mypy black flake8;
 fi
 
 source venv/bin/activate
