@@ -1,0 +1,30 @@
+name: ci
+
+on: 
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Dependencies
+        run: source setup-venv.sh && ./install-hooks.sh
+      - name: Setup Conan
+        run: source setup-venv.sh && conan profile new default --detect
+      - name: Build
+        run: source setup-venv.sh && ./test-build.sh
+      - name: black
+        run: source setup-venv.sh && black --check recipes
+      - name: flake8
+        run: source setup-venv.sh && flake8 recipes

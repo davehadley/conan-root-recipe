@@ -2,6 +2,7 @@
 #include <catch2/catch.hpp>
 
 #include <iostream>
+#include "TRandom3.h"
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -11,15 +12,18 @@
 
 TEST_CASE( "Basic histogram operation", "[hist]" ) {
     int N = 100;
-    TH1F hist(
+    auto hist = new TH1F (
         "testhist",
         "This is a test",
         100,
         -5.0,
         5.0
     );
-    hist.FillRandom("gaus", N);
-    int actual = hist.GetEntries();
+    TRandom3 random(1234);
+    for (int i=0; i<N; ++i) {
+        hist->Fill(random.Gaus(0.0, 1.0));
+    }
+    int actual = hist->GetEntries();
     REQUIRE(N == actual);
 }
 
