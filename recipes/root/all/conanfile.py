@@ -43,7 +43,7 @@ class RootConan(ConanFile):
         # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
     }
-    generators = ("cmake_find_package",)
+    generators = ("cmake_find_package", "cmake_paths")
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -80,9 +80,18 @@ class RootConan(ConanFile):
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
+            include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+            find_package(GLEW REQUIRED)
             find_package(SQLite3 REQUIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
             set(SQLITE_LIBRARIES SQLite::SQLite)
+            """,
+        )
+        tools.replace_in_file(
+            f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
+            "include(ExternalProject)",
+            """include(ExternalProject)
+            include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
             """,
         )
         # Fix execute permissions on scripts
