@@ -81,7 +81,8 @@ class RootConan(ConanFile):
             "project(ROOT)",
             """project(ROOT)
             include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-            find_package(GLEW REQUIRED)
+            find_package(TBB REQUIRED)
+            set(TBB_LIBRARY TBB::tbb)
             find_package(SQLite3 REQUIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
             set(SQLITE_LIBRARIES SQLite::SQLite)
@@ -89,8 +90,9 @@ class RootConan(ConanFile):
         )
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
-            "include(ExternalProject)",
-            """include(ExternalProject)
+            "include(FindPackageHandleStandardArgs)",
+            """
+            include(FindPackageHandleStandardArgs)
             include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
             """,
         )
