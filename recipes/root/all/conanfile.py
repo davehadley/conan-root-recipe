@@ -86,6 +86,8 @@ class RootConan(ConanFile):
             find_package(SQLite3 REQUIRED)
             set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
             set(SQLITE_LIBRARIES SQLite::SQLite)
+            find_package(OpenSSL REQUIRED)
+            set(OPENSSL_VERSION ${OpenSSL_VERSION})
             """,
         )
         tools.replace_in_file(
