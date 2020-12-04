@@ -1,20 +1,17 @@
-#include <assert.h>
+#include <stdexcept>
 #include <iostream>
-#include "TRandom3.h"
-#include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TSystem.h"
 #include "TTreeReader.h"
 #include "Event.hpp"
 
 
 void check(bool result, std::string message) {
-    if (!result) { throw std::runtime_error("testrootio FAILED : " + message); }
+    if (!result) { throw std::runtime_error("ERROR : testrootio failed : " + message); }
 }
 
 
-void create_events_file(std::string name = "testevents.root", const int Nevent = 10, const int Npart = 10) {
+void create_test_file(std::string name, const int Nevent, const int Npart) {
     auto tfile = TFile::Open(name.c_str(), "RECREATE");
     auto tree = new TTree("tree", "tree");
     Event* event = 0;
@@ -33,13 +30,9 @@ void create_events_file(std::string name = "testevents.root", const int Nevent =
     delete tfile;
 }
 
-int main() {
-    gSystem->Load("libEvent");
-    const std::string fname = "testevents.root";
-    const int Nevent = 10;
-    const int Npart = 10;
-    create_events_file(fname, Nevent, Npart);
-    auto tfile = TFile::Open(fname.c_str(), "READ");
+
+void read_test_file(std::string name, const int Nevent, const int Npart) {
+    auto tfile = TFile::Open(name.c_str(), "READ");
     auto tree = tfile->Get<TTree>("tree");
     Event* event = 0;
     tree->SetBranchAddress("events", &event);
@@ -54,6 +47,15 @@ int main() {
             check(p.getP4().X() == 1.0, "read bad 4-vector");
         }
     }
+}
+
+
+int main() {
+    const std::string fname = "testevents.root";
+    const int Nevent = 3;
+    const int Npart = 3;
+    create_test_file(fname, Nevent, Npart);
+    read_test_file(fname, Nevent, Npart);
     return 0;
 }
 
