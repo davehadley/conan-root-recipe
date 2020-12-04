@@ -198,9 +198,6 @@ class RootConan(ConanFile):
                     "builtin_gl2ps": "ON",
                     "builtin_ftgl": "ON",
                     "builtin_vdt": "OFF",  # TODO turn back on
-                    # xrootd doesn't build with builtin openssl.
-                    "builtin_xrootd": "ON",
-                    "xrootd": "ON",
                     # No Conan packages available for these dependencies yet
                     "davix": "OFF",
                     "pythia6": "OFF",
@@ -210,6 +207,7 @@ class RootConan(ConanFile):
                     "pgsql": "OFF",
                     "gfal": "OFF",
                     "tmva-pymva": "OFF",
+                    "xrootd": "OFF",
                     "pyroot": self._pyrootopt,
                     "gnuinstall": "OFF",
                     "soversion": "ON",
