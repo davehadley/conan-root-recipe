@@ -7,7 +7,7 @@
 
 
 void check(bool result, std::string message) {
-    if (!result) { throw std::runtime_error("ERROR : testrootio failed : " + message); }
+    if (!result) { throw std::runtime_error("ERROR : testrootdictionaries failed : " + message); }
 }
 
 
@@ -39,10 +39,9 @@ void read_test_file(std::string name, const int Nevent, const int Npart) {
     check (tree->GetEntries() == Nevent, "event count mismatch");
     for(int eventnum = 0; eventnum < Nevent; ++eventnum) {
         check(tree->GetEntry(eventnum)>0, "read zero event size");
-        auto ev = event;    
-        check(ev->particles.size() == Npart, "read no particles");
+        check(event->particles.size() == Npart, "read no particles");
         for(int index = 0; index < Npart; ++index) {
-            auto& p = ev->particles.at(index);
+            auto& p = event->particles.at(index);
             check(p.getID() == index, "read bad index");
             check(p.getP4().X() == 1.0, "read bad 4-vector");
         }
@@ -51,11 +50,13 @@ void read_test_file(std::string name, const int Nevent, const int Npart) {
 
 
 int main() {
+    std::cout << "--- testrootdictionaries " << std::endl;
     const std::string fname = "testevents.root";
     const int Nevent = 3;
     const int Npart = 3;
     create_test_file(fname, Nevent, Npart);
     read_test_file(fname, Nevent, Npart);
+    std::cout << "--- testrootdictionaries... ok." << std::endl;
     return 0;
 }
 
