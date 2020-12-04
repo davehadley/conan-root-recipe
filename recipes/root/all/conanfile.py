@@ -216,7 +216,7 @@ class RootConan(ConanFile):
 
         print(dir(self))
         print(os.getcwd())
-        for f in ["opengl_system", "GLEW", "glu", "TBB"]:
+        for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2"]:
             shutil.copy(
                 f"Find{f}.cmake",
                 f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
