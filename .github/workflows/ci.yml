@@ -11,9 +11,8 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       max-parallel: 5
-    
+    timeout-minutes: 600
     steps:
-      - timeout-minutes: 600
       - uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
