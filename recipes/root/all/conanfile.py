@@ -83,7 +83,7 @@ class RootConan(ConanFile):
     @property
     def _rootsrcdir(self):
         version = self.version.replace("v", "")
-        return f"root-{version}"
+        return "root-{}".format(version)
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -115,14 +115,14 @@ class RootConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
 
     def _patch_source_cmake(self):
-        os.remove(f"{self._rootsrcdir}/cmake/modules/FindTBB.cmake")
+        os.remove(os.sep.join((self._rootsrcdir, "cmake", "modules", "FindTBB.cmake")))
         # Conan generated cmake_find_packages names differ from
         # names ROOT expects (usually only due to case differences)
         # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
-            f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
+            os.sep.join((self._rootsrcdir, "CMakeLists.txt")),
             "project(ROOT)",
             """project(ROOT)
             find_package(OpenSSL REQUIRED)
@@ -141,10 +141,10 @@ class RootConan(ConanFile):
         scripts = [
             filename
             for pattern in (
-                f"**{os.sep}configure",
-                f"**{os.sep}*.sh",
-                f"**{os.sep}*.csh",
-                f"**{os.sep}*.bat",
+                "**" + os.sep + "configure",
+                "**" + os.sep + "*.sh",
+                "**" + os.sep + "*.csh",
+                "**" + os.sep + "*.bat",
             )
             for filename in glob(pattern, recursive=True)
         ]
@@ -164,7 +164,7 @@ class RootConan(ConanFile):
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
             cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
             self._cmake.configure(
-                source_folder=f"root-{version}",
+                source_folder="root-{}".format(version),
                 defs={
                     # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
                     # (see: https://github.com/conan-io/hooks/issues/252)
@@ -211,7 +211,9 @@ class RootConan(ConanFile):
                     # resources get installed.
                     # Set install prefix to work around these limitations
                     # Following: https://github.com/conan-io/conan/issues/3695
-                    "CMAKE_INSTALL_PREFIX": f"{self.package_folder}{os.sep}res",
+                    "CMAKE_INSTALL_PREFIX": "{}{}res".format(
+                        self.package_folder, os.sep
+                    ),
                     # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["libpng"].include_paths
@@ -229,8 +231,8 @@ class RootConan(ConanFile):
     def _move_findcmake_conan_to_root_dir(self):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
-                f"Find{f}.cmake",
-                f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
+                "Find{}.cmake".format(f),
+                os.sep.join((self.source_folder, self._rootsrcdir, "cmake", "modules")),
             )
 
     @property
@@ -256,17 +258,17 @@ class RootConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses")
         for dir in ["include", "lib", "bin"]:
             os.symlink(
-                f"{self.package_folder}{os.sep}res{os.sep}{dir}",
-                f"{self.package_folder}{os.sep}{dir}",
+                os.sep.join((self.package_folder, "res", dir)),
+                os.sep.join((self.package_folder, dir)),
             )
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
         for cmakefile in glob(
-            f"{self.package_folder}{os.sep}res{os.sep}cmake{os.sep}*Config*.cmake"
+            os.sep.join((self.package_folder, "res", "cmake", "*Config*.cmake"))
         ):
             os.remove(cmakefile)
         # Fix for CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)
         os.remove(
-            f"{self.package_folder}{os.sep}res{os.sep}tutorials{os.sep}CTestCustom.cmake"
+            os.sep.join((self.package_folder, "res", "tutorials", "CTestCustom.cmake"))
         )
 
     def package_info(self):
@@ -296,11 +298,11 @@ class RootConan(ConanFile):
             "MultiProc",
             "ROOTDataFrame",
         ]
-        self.cpp_info.builddirs = [f"res{os.sep}cmake"]
+        self.cpp_info.builddirs = ["res" + os.sep + "cmake"]
         self.cpp_info.build_modules.extend(
             [
-                f"res{os.sep}cmake{os.sep}RootMacros.cmake",
-                # f"res{os.sep}cmake{os.sep}ROOTUseFile.cmake",
+                os.sep.join(("res", "cmake", "RootMacros.cmake")),
+                # os.sep.join(("res", "cmake", "ROOTUseFile.cmake")),
             ]
         )
         self.cpp_info.resdirs = ["res"]
