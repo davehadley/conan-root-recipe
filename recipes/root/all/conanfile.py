@@ -190,7 +190,7 @@ class RootConan(ConanFile):
                     "builtin_gsl": "ON",
                     "builtin_gl2ps": "ON",
                     "builtin_ftgl": "ON",
-                    "builtin_vdt": "OFF",  # TODO turn back on
+                    "builtin_vdt": "ON",
                     # No Conan packages available for these dependencies yet
                     "davix": "OFF",
                     "pythia6": "OFF",
@@ -221,9 +221,6 @@ class RootConan(ConanFile):
                     "LIBLZMA_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["xz_utils"].include_paths
                     ),
-                    # TODO: for local testing only, remember to remove
-                    "vdt": "OFF",
-                    "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
         return self._cmake
