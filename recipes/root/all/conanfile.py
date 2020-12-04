@@ -40,10 +40,11 @@ class RootConan(ConanFile):
         "fPIC": True,
         "libxml2:shared": True,
         "sqlite3:shared": True,
+        # "zlib:shared": True,
         # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
     }
-    generators = ("cmake_find_package", "cmake_paths")
+    generators = "cmake_find_package"
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -63,41 +64,103 @@ class RootConan(ConanFile):
         "cfitsio/3.490",
         "tbb/2020.3",
         # "libuuid/1.0.3",
+        # "freetype/2.10.4",
+        "libpng/1.6.37",
+        # "zlib/1.2.11",
     )
+
+    def __init__(self, *args, **kwargs):
+        super(RootConan, self).__init__(*args, **kwargs)
+        self._cmake = None
 
     def configure(self):
         tools.check_min_cppstd(self, "11")
+        # self.deps_cpp_info["lz4"].names["cmake_find_package"] = "LZ4"
 
     @property
     def _rootsrcdir(self) -> str:
         version = self.version.replace("v", "")
         return f"root-{version}"
 
+    def install(self):
+        raise Exception("was insall claled?")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        # Patch ROOT CMake to use Conan SQLITE
+        # prevent ROOT from overriding CMAKE_MODULE_PATH
+        # tools.replace_in_file(
+        #   f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
+        #   "set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
+        #   "list(PREPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
+        # )
+        # ROOT builtin and CCI dependencies disagree on package name case
+        # There is no way to override the dependency cmake_find_package name
+        # see: https://github.com/conan-io/conan/issues/4430
+        # So we must patch ROOT CMake to use the CCI package names
+        for conanname, rootname, required in [  # ("lz4", "LZ4", True),
+            # ("zstd", "ZSTD", True),
+            # ("SQLite3", "Sqlite", False),
+            # ("FFTW3", "FFTW", False),
+        ]:
+            rootuppername = rootname.upper()
+            src = f"find_package({rootname})"
+            if required:
+                src = f"find_package({rootname} REQUIRED)"
+            tools.replace_in_file(
+                f"{self._rootsrcdir}/cmake/modules/SearchInstalledSoftware.cmake",
+                src,
+                f"""find_package({conanname} REQUIRED)
+                set({rootuppername}_VERSION ${{{conanname}_VERSION}})
+                set({rootuppername}_FOUND ${{{conanname}_FOUND}})
+                set({rootuppername}_LIBRARIES ${{{conanname}_LIBRARIES}})
+                add_library({rootname}::{rootname} INTERFACE IMPORTED)
+                target_link_libraries ({rootname}::{rootname} INTERFACE {conanname}::{conanname})
+                """,
+            )
+
+        os.remove(f"{self._rootsrcdir}/cmake/modules/FindTBB.cmake")
+
+        # # Patch ROOT CMake to use Conan SQLITE
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
-            include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-            find_package(TBB REQUIRED)
-            set(TBB_LIBRARY TBB::tbb)
-            find_package(SQLite3 REQUIRED)
-            set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
-            set(SQLITE_LIBRARIES SQLite::SQLite)
+            # find_package(TBB REQUIRED)
+            # set(TBB_LIBRARY TBB::tbb)
+            # set(TBB_INCLUDE_DIR ${TBB_INCLUDE_DIRS})
+            # #find_package(SQLite3 REQUIRED)
+            # #set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
+            # #set(SQLITE_LIBRARIES SQLite::SQLite)
             find_package(OpenSSL REQUIRED)
             set(OPENSSL_VERSION ${OpenSSL_VERSION})
+            # find_package(PNG REQUIRED)
+            # set(PNG_PNG_INCLUDE_DIR ${PNG_INCLUDE_DIR})
+            # find_package(LibLZMA REQUIRED)
+            # set(LZMA_INCLUDE_DIR ${LibLZMA_INCLUDE_DIRS})
+            # set(LZMA_LIBRARY LibLZMA::LibLZMA)
+            # find_package(zstd REQUIRED)
+            # set(ZSTD_LIBRARIES zstd::zstd)
             """,
         )
-        tools.replace_in_file(
-            f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
-            "include(FindPackageHandleStandardArgs)",
-            """
-            include(FindPackageHandleStandardArgs)
-            include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-            """,
-        )
+        # tools.replace_in_file(
+        #     f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
+        #     "include(FindPackageHandleStandardArgs)",
+        #     """include(FindPackageHandleStandardArgs)
+        #     include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
+        #     find_package(TBB REQUIRED)
+        #     set(TBB_INCLUDE_DIR ${TBB_INCLUDE_DIRS})
+        #     set(TBB_LIBRARY TBB::tbb)
+        #     """
+        # )
+        # # ROOT defines its own find_package macro that interferes with finding Conan packages
+        # # we need to disable this
+        # tools.replace_in_file(f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
+        #    "macro(find_package)",
+        #    "macro(find_package_disabled)"
+        # )
+        # tools.replace_in_file(
+        #     f"{self._rootsrcdir}{os.sep}cmake/modules/RootMacros.cmake",
+        # )
         # Fix execute permissions on scripts
         scripts = [
             filename
@@ -118,63 +181,85 @@ class RootConan(ConanFile):
 
     @contextmanager
     def _configure_cmake(self) -> CMake:
-        cmake = CMake(self)
-        version = self.version.replace("v", "")
-        cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
-        cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
-        cmake.configure(
-            source_folder=f"root-{version}",
-            defs={
-                # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
-                # (see: https://github.com/conan-io/hooks/issues/252)
-                "BUILD_SHARED_LIBS": "ON",
-                "fail-on-missing": "ON",
-                "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
-                # Prefer builtins where available
-                "builtin_pcre": "OFF",
-                "builtin_lzma": "OFF",
-                "builtin_zstd": "OFF",
-                "builtin_xxhash": "ON",
-                "builtin_lz4": "OFF",
-                "builtin_afterimage": "ON",
-                "builtin_gsl": "ON",
-                "builtin_glew": "OFF",
-                "builtin_gl2ps": "ON",
-                "builtin_openssl": "OFF",
-                "builtin_fftw3": "OFF",
-                "builtin_cfitsio": "OFF",
-                "builtin_ftgl": "ON",
-                "builtin_davix": "OFF",
-                "builtin_tbb": "OFF",
-                "builtin_vdt": "ON",
-                # xrootd doesn't build with builtin openssl.
-                "builtin_xrootd": "OFF",
-                "xrootd": "OFF",
-                # No Conan packages available for these dependencies yet
-                "davix": "OFF",
-                "pythia6": "OFF",
-                "pythia8": "OFF",
-                "mysql": "OFF",
-                "oracle": "OFF",
-                "pgsql": "OFF",
-                "gfal": "OFF",
-                "tmva-pymva": "OFF",
-                "pyroot": self._pyrootopt,
-                "gnuinstall": "OFF",
-                "soversion": "ON",
-                # Tell CMake where to look for Conan provided depedencies
-                "CMAKE_LIBRARY_PATH": cmakelibpath,
-                "CMAKE_INCLUDE_PATH": cmakeincludepath,
-                # Configure install directories
-                # Conan CCI hooks restrict the allowed install directory
-                # names but ROOT is very picky about where build/runtime
-                # resources get installed.
-                # Set install prefix to work around these limitations
-                # Following: https://github.com/conan-io/conan/issues/3695
-                "CMAKE_INSTALL_PREFIX": f"{self.package_folder}{os.sep}res",
-            },
-        )
-        yield cmake
+        import shutil
+
+        print(dir(self))
+        print(os.getcwd())
+        for f in ["opengl_system", "GLEW", "glu", "TBB"]:
+            shutil.copy(
+                f"Find{f}.cmake",
+                f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
+            )
+        self.deps_cpp_info["lz4"].names["cmake_find_package"] = "LZ4"
+        if self._cmake is None:
+            self._cmake = CMake(self)
+            version = self.version.replace("v", "")
+            cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
+            cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
+            self._cmake.configure(
+                source_folder=f"root-{version}",
+                defs={
+                    # "CMAKE_TOOLCHAIN_FILE" : "conan_paths.cmake",
+                    # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
+                    # (see: https://github.com/conan-io/hooks/issues/252)
+                    "BUILD_SHARED_LIBS": "ON",
+                    "fail-on-missing": "ON",
+                    "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
+                    # Prefer builtins where available
+                    "builtin_pcre": "OFF",
+                    "builtin_lzma": "OFF",
+                    "builtin_zstd": "OFF",
+                    "builtin_xxhash": "ON",
+                    "builtin_lz4": "OFF",
+                    "builtin_afterimage": "ON",
+                    "builtin_gsl": "ON",
+                    "builtin_glew": "OFF",
+                    "builtin_gl2ps": "ON",
+                    "builtin_openssl": "OFF",
+                    "builtin_fftw3": "OFF",
+                    "builtin_cfitsio": "OFF",
+                    "builtin_ftgl": "ON",
+                    "builtin_davix": "OFF",
+                    "builtin_tbb": "OFF",
+                    "builtin_vdt": "ON",
+                    # xrootd doesn't build with builtin openssl.
+                    "builtin_xrootd": "OFF",
+                    "xrootd": "OFF",
+                    # No Conan packages available for these dependencies yet
+                    "davix": "OFF",
+                    "pythia6": "OFF",
+                    "pythia8": "OFF",
+                    "mysql": "OFF",
+                    "oracle": "OFF",
+                    "pgsql": "OFF",
+                    "gfal": "OFF",
+                    "tmva-pymva": "OFF",
+                    "pyroot": self._pyrootopt,
+                    "gnuinstall": "OFF",
+                    "soversion": "ON",
+                    # Tell CMake where to look for Conan provided depedencies
+                    "CMAKE_LIBRARY_PATH": cmakelibpath,
+                    "CMAKE_INCLUDE_PATH": cmakeincludepath,
+                    # Configure install directories
+                    # Conan CCI hooks restrict the allowed install directory
+                    # names but ROOT is very picky about where build/runtime
+                    # resources get installed.
+                    # Set install prefix to work around these limitations
+                    # Following: https://github.com/conan-io/conan/issues/3695
+                    "CMAKE_INSTALL_PREFIX": f"{self.package_folder}{os.sep}res",
+                    "CMAKE_VERBOSE_MAKEFILE": "ON",
+                    # "TBB_ROOT_DIR": self.deps_cpp_info.include_paths[0] + "/../"
+                    # "OPENSSL_VERSION": self.deps_cpp_info["openssl"].version,
+                    "PNG_PNG_INCLUDE_DIR": ";".join(
+                        self.deps_cpp_info["libpng"].include_paths
+                    ),
+                    # "LZMA" : "LibLZMA::LibLZMA",
+                    "LIBLZMA_INCLUDE_DIR": ";".join(
+                        self.deps_cpp_info["xz_utils"].include_paths
+                    ),
+                },
+            )
+        yield self._cmake
 
     @property
     def _CMAKE_CXX_STANDARD(self):
@@ -215,6 +300,8 @@ class RootConan(ConanFile):
         )
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ROOT"
+        self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         # see root-config --libs for a list of libs
