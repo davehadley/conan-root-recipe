@@ -39,9 +39,6 @@ class RootConan(ConanFile):
     default_options = {
         # "shared": True,
         "fPIC": True,
-        # "libxml2:shared": True,
-        # "sqlite3:shared": True,
-        # "zlib:shared": True,
         # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
     }
@@ -64,10 +61,7 @@ class RootConan(ConanFile):
         "fftw/3.3.8",
         "cfitsio/3.490",
         "tbb/2020.3",
-        # "libuuid/1.0.3",
-        # "freetype/2.10.4",
         "libpng/1.6.37",
-        # "zlib/1.2.11",
     )
 
     def __init__(self, *args, **kwargs):
@@ -114,41 +108,20 @@ class RootConan(ConanFile):
                 )
 
     def source(self):
+        self._checkout_source()
+        self._fix_source_permissions()
+        self._patch_source_cmake()
+
+    def _checkout_source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        # prevent ROOT from overriding CMAKE_MODULE_PATH
-        # tools.replace_in_file(
-        #   f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
-        #   "set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
-        #   "list(PREPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
-        # )
-        # ROOT builtin and CCI dependencies disagree on package name case
-        # There is no way to override the dependency cmake_find_package name
-        # see: https://github.com/conan-io/conan/issues/4430
-        # So we must patch ROOT CMake to use the CCI package names
-        for conanname, rootname, required in [  # ("lz4", "LZ4", True),
-            # ("zstd", "ZSTD", True),
-            # ("SQLite3", "Sqlite", False),
-            # ("FFTW3", "FFTW", False),
-        ]:
-            rootuppername = rootname.upper()
-            src = f"find_package({rootname})"
-            if required:
-                src = f"find_package({rootname} REQUIRED)"
-            tools.replace_in_file(
-                f"{self._rootsrcdir}/cmake/modules/SearchInstalledSoftware.cmake",
-                src,
-                f"""find_package({conanname} REQUIRED)
-                set({rootuppername}_VERSION ${{{conanname}_VERSION}})
-                set({rootuppername}_FOUND ${{{conanname}_FOUND}})
-                set({rootuppername}_LIBRARIES ${{{conanname}_LIBRARIES}})
-                add_library({rootname}::{rootname} INTERFACE IMPORTED)
-                target_link_libraries ({rootname}::{rootname} INTERFACE {conanname}::{conanname})
-                """,
-            )
 
+    def _patch_source_cmake(self):
         os.remove(f"{self._rootsrcdir}/cmake/modules/FindTBB.cmake")
-
-        # # Patch ROOT CMake to use Conan SQLITE
+        # Conan generated cmake_find_packages names differ from
+        # names ROOT expects (usually only due to case differences)
+        # There is currently no way to change these names 
+        # see: https://github.com/conan-io/conan/issues/4430
+        # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
@@ -170,25 +143,8 @@ class RootConan(ConanFile):
             # set(ZSTD_LIBRARIES zstd::zstd)
             """,
         )
-        # tools.replace_in_file(
-        #     f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
-        #     "include(FindPackageHandleStandardArgs)",
-        #     """include(FindPackageHandleStandardArgs)
-        #     include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
-        #     find_package(TBB REQUIRED)
-        #     set(TBB_INCLUDE_DIR ${TBB_INCLUDE_DIRS})
-        #     set(TBB_LIBRARY TBB::tbb)
-        #     """
-        # )
-        # # ROOT defines its own find_package macro that interferes with finding Conan packages
-        # # we need to disable this
-        # tools.replace_in_file(f"{self._rootsrcdir}{os.sep}cmake/modules/SearchInstalledSoftware.cmake",
-        #    "macro(find_package)",
-        #    "macro(find_package_disabled)"
-        # )
-        # tools.replace_in_file(
-        #     f"{self._rootsrcdir}{os.sep}cmake/modules/RootMacros.cmake",
-        # )
+
+    def _fix_source_permissions(self):
         # Fix execute permissions on scripts
         scripts = [
             filename
