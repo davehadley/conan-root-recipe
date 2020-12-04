@@ -119,28 +119,21 @@ class RootConan(ConanFile):
         os.remove(f"{self._rootsrcdir}/cmake/modules/FindTBB.cmake")
         # Conan generated cmake_find_packages names differ from
         # names ROOT expects (usually only due to case differences)
-        # There is currently no way to change these names 
+        # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
             f"{self._rootsrcdir}{os.sep}CMakeLists.txt",
             "project(ROOT)",
             """project(ROOT)
-            # find_package(TBB REQUIRED)
-            # set(TBB_LIBRARY TBB::tbb)
-            # set(TBB_INCLUDE_DIR ${TBB_INCLUDE_DIRS})
-            # #find_package(SQLite3 REQUIRED)
-            # #set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
-            # #set(SQLITE_LIBRARIES SQLite::SQLite)
             find_package(OpenSSL REQUIRED)
             set(OPENSSL_VERSION ${OpenSSL_VERSION})
-            # find_package(PNG REQUIRED)
-            # set(PNG_PNG_INCLUDE_DIR ${PNG_INCLUDE_DIR})
-            # find_package(LibLZMA REQUIRED)
-            # set(LZMA_INCLUDE_DIR ${LibLZMA_INCLUDE_DIRS})
-            # set(LZMA_LIBRARY LibLZMA::LibLZMA)
-            # find_package(zstd REQUIRED)
-            # set(ZSTD_LIBRARIES zstd::zstd)
+            find_package(LibXml2 REQUIRED)
+            set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
+            set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
+            find_package(SQLite3 REQUIRED)
+            set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
+            set(SQLITE_LIBRARIES SQLite::SQLite)
             """,
         )
 
@@ -169,7 +162,7 @@ class RootConan(ConanFile):
 
         print(dir(self))
         print(os.getcwd())
-        for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2"]:
+        for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 f"Find{f}.cmake",
                 f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
