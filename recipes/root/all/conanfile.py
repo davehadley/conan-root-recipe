@@ -2,7 +2,6 @@ import os
 import shutil
 import stat
 from glob import glob
-from typing import List
 
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
@@ -82,7 +81,7 @@ class RootConan(ConanFile):
         }
 
     @property
-    def _rootsrcdir(self) -> str:
+    def _rootsrcdir(self):
         version = self.version.replace("v", "")
         return f"root-{version}"
 
@@ -275,7 +274,7 @@ class RootConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
-        # see root-config --libs for a list of libs
+        # See root-config --libs for a list of ordered libs
         self.cpp_info.libs = [
             "Core",
             "Imt",
@@ -305,8 +304,3 @@ class RootConan(ConanFile):
             ]
         )
         self.cpp_info.resdirs = ["res"]
-
-    def _fix_tbb_libs(self, libs: List[str]) -> List[str]:
-        # Special treatment for tbb
-        # (to handle issue https://github.com/conan-io/conan/issues/5428)
-        return [(("lib" + name + ".so.2") if "tbb" in name else name) for name in libs]
