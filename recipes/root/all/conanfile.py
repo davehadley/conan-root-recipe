@@ -38,8 +38,8 @@ class RootConan(ConanFile):
     default_options = {
         # "shared": True,
         "fPIC": True,
-        "libxml2:shared": True,
-        "sqlite3:shared": True,
+        # "libxml2:shared": True,
+        # "sqlite3:shared": True,
         # "zlib:shared": True,
         # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
