@@ -87,6 +87,11 @@ class RootConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    @property
+    def _rootsrcdir(self) -> str:
+        version = self.version.replace("v", "")
+        return f"root-{version}"
+
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
@@ -107,14 +112,6 @@ class RootConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
-
-    @property
-    def _rootsrcdir(self) -> str:
-        version = self.version.replace("v", "")
-        return f"root-{version}"
-
-    def install(self):
-        raise Exception("was insall claled?")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
