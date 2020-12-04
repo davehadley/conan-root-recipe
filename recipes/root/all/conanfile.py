@@ -1,7 +1,6 @@
 import os
 import shutil
 import stat
-from contextlib import contextmanager
 from glob import glob
 from typing import List
 
@@ -157,15 +156,8 @@ class RootConan(ConanFile):
         st = os.stat(filename)
         os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
-    def _move_findcmake_conan_to_root_dir(self):
-        for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
-            shutil.copy(
-                f"Find{f}.cmake",
-                f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
-            )
-
-    @contextmanager
-    def _configure_cmake(self) -> CMake:
+    @property
+    def _configured_cmake(self):
         if self._cmake is None:
             self._move_findcmake_conan_to_root_dir()
             self._cmake = CMake(self)
@@ -180,6 +172,8 @@ class RootConan(ConanFile):
                     "BUILD_SHARED_LIBS": "ON",
                     "fail-on-missing": "ON",
                     "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
+                    "gnuinstall": "OFF",
+                    "soversion": "ON",
                     # Disable builtins and use Conan deps where available
                     "builtin_pcre": "OFF",
                     "builtin_lzma": "OFF",
@@ -209,8 +203,6 @@ class RootConan(ConanFile):
                     "tmva-pymva": "OFF",
                     "xrootd": "OFF",
                     "pyroot": self._pyrootopt,
-                    "gnuinstall": "OFF",
-                    "soversion": "ON",
                     # Tell CMake where to look for Conan provided depedencies
                     "CMAKE_LIBRARY_PATH": cmakelibpath,
                     "CMAKE_INCLUDE_PATH": cmakeincludepath,
@@ -221,12 +213,10 @@ class RootConan(ConanFile):
                     # Set install prefix to work around these limitations
                     # Following: https://github.com/conan-io/conan/issues/3695
                     "CMAKE_INSTALL_PREFIX": f"{self.package_folder}{os.sep}res",
-                    # "TBB_ROOT_DIR": self.deps_cpp_info.include_paths[0] + "/../"
-                    # "OPENSSL_VERSION": self.deps_cpp_info["openssl"].version,
+                    # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["libpng"].include_paths
                     ),
-                    # "LZMA" : "LibLZMA::LibLZMA",
                     "LIBLZMA_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["xz_utils"].include_paths
                     ),
@@ -235,7 +225,14 @@ class RootConan(ConanFile):
                     "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
-        yield self._cmake
+        return self._cmake
+
+    def _move_findcmake_conan_to_root_dir(self):
+        for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
+            shutil.copy(
+                f"Find{f}.cmake",
+                f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
+            )
 
     @property
     def _CMAKE_CXX_STANDARD(self):
@@ -253,12 +250,10 @@ class RootConan(ConanFile):
             return "ON"
 
     def build(self):
-        with self._configure_cmake() as cmake:
-            cmake.build()
+        self._configured_cmake.build()
 
     def package(self):
-        with self._configure_cmake() as cmake:
-            cmake.install()
+        self._configured_cmake.install()
         self.copy("LICENSE.txt", dst="licenses")
         for dir in ["include", "lib", "bin"]:
             os.symlink(
