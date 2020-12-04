@@ -9,3 +9,4 @@ fi
 source venv/bin/activate
 export CONAN_HOOK_ERROR_LEVEL=40
 export CONAN_SYSREQUIRES_MODE=enabled
+#export CONAN_CPU_COUNT=16
