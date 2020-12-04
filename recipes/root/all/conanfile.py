@@ -1,4 +1,5 @@
 import os
+import shutil
 import stat
 from contextlib import contextmanager
 from glob import glob
@@ -156,19 +157,17 @@ class RootConan(ConanFile):
         st = os.stat(filename)
         os.chmod(filename, st.st_mode | stat.S_IEXEC)
 
-    @contextmanager
-    def _configure_cmake(self) -> CMake:
-        import shutil
-
-        print(dir(self))
-        print(os.getcwd())
+    def _move_findcmake_conan_to_root_dir(self):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 f"Find{f}.cmake",
                 f"{self.source_folder}/{self._rootsrcdir}{os.sep}cmake/modules/",
             )
-        self.deps_cpp_info["lz4"].names["cmake_find_package"] = "LZ4"
+
+    @contextmanager
+    def _configure_cmake(self) -> CMake:
         if self._cmake is None:
+            self._move_findcmake_conan_to_root_dir()
             self._cmake = CMake(self)
             version = self.version.replace("v", "")
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
@@ -176,32 +175,32 @@ class RootConan(ConanFile):
             self._cmake.configure(
                 source_folder=f"root-{version}",
                 defs={
-                    # "CMAKE_TOOLCHAIN_FILE" : "conan_paths.cmake",
                     # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
                     # (see: https://github.com/conan-io/hooks/issues/252)
                     "BUILD_SHARED_LIBS": "ON",
                     "fail-on-missing": "ON",
                     "CMAKE_CXX_STANDARD": self._CMAKE_CXX_STANDARD,
-                    # Prefer builtins where available
+                    # Disable builtins and use Conan deps where available
                     "builtin_pcre": "OFF",
                     "builtin_lzma": "OFF",
                     "builtin_zstd": "OFF",
-                    "builtin_xxhash": "ON",
                     "builtin_lz4": "OFF",
-                    "builtin_afterimage": "ON",
-                    "builtin_gsl": "ON",
                     "builtin_glew": "OFF",
-                    "builtin_gl2ps": "ON",
                     "builtin_openssl": "OFF",
                     "builtin_fftw3": "OFF",
                     "builtin_cfitsio": "OFF",
-                    "builtin_ftgl": "ON",
                     "builtin_davix": "OFF",
                     "builtin_tbb": "OFF",
-                    "builtin_vdt": "ON",
+                    # Enable builtins where there is no Conan package
+                    "builtin_xxhash": "ON",
+                    "builtin_afterimage": "ON",
+                    "builtin_gsl": "ON",
+                    "builtin_gl2ps": "ON",
+                    "builtin_ftgl": "ON",
+                    "builtin_vdt": "OFF",  # TODO turn back on
                     # xrootd doesn't build with builtin openssl.
-                    "builtin_xrootd": "OFF",
-                    "xrootd": "OFF",
+                    "builtin_xrootd": "ON",
+                    "xrootd": "ON",
                     # No Conan packages available for these dependencies yet
                     "davix": "OFF",
                     "pythia6": "OFF",
@@ -224,7 +223,6 @@ class RootConan(ConanFile):
                     # Set install prefix to work around these limitations
                     # Following: https://github.com/conan-io/conan/issues/3695
                     "CMAKE_INSTALL_PREFIX": f"{self.package_folder}{os.sep}res",
-                    "CMAKE_VERBOSE_MAKEFILE": "ON",
                     # "TBB_ROOT_DIR": self.deps_cpp_info.include_paths[0] + "/../"
                     # "OPENSSL_VERSION": self.deps_cpp_info["openssl"].version,
                     "PNG_PNG_INCLUDE_DIR": ";".join(
@@ -234,13 +232,16 @@ class RootConan(ConanFile):
                     "LIBLZMA_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["xz_utils"].include_paths
                     ),
+                    # TODO: for local testing only, remember to remove
+                    "vdt": "OFF",
+                    "CMAKE_VERBOSE_MAKEFILE": "ON",
                 },
             )
         yield self._cmake
 
     @property
     def _CMAKE_CXX_STANDARD(self):
-        compileropt = self.settings.compiler.cppstd
+        compileropt = self.settings.compiler.get_safe("cppstd")
         if compileropt:
             return str(compileropt)
         else:
