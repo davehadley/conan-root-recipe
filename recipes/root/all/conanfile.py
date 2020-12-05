@@ -13,7 +13,6 @@ class PythonOption:
     # in future we may allow the user to specify a version when
     # libPython is available in Conan Center Index.
     ALL = [OFF, SYSTEM]
-    DEFAULT = OFF
 
 
 class RootConan(ConanFile):
