@@ -62,9 +62,7 @@ class RootConan(ConanFile):
         "libpng/1.6.37",
     )
 
-    def __init__(self, *args, **kwargs):
-        super(RootConan, self).__init__(*args, **kwargs)
-        self._cmake = None
+    _cmake = None
 
     @property
     def _minimum_cpp_standard(self):
