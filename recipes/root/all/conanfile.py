@@ -210,9 +210,7 @@ class RootConan(ConanFile):
                     # resources get installed.
                     # Set install prefix to work around these limitations
                     # Following: https://github.com/conan-io/conan/issues/3695
-                    "CMAKE_INSTALL_PREFIX": "{}{}res".format(
-                        self.package_folder, os.sep
-                    ),
+                    "CMAKE_INSTALL_PREFIX": os.sep.join((self.package_folder, "res")),
                     # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["libpng"].include_paths
@@ -258,10 +256,7 @@ class RootConan(ConanFile):
                 os.sep.join((self.package_folder, dir)),
             )
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
-        for cmakefile in glob(
-            os.sep.join((self.package_folder, "res", "cmake", "*Config*.cmake"))
-        ):
-            os.remove(cmakefile)
+        tools.remove_files_by_mask(self.package_folder, "*Config*.cmake")
         # Fix for CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)
         os.remove(
             os.sep.join((self.package_folder, "res", "tutorials", "CTestCustom.cmake"))
