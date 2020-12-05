@@ -105,8 +105,6 @@ class RootConan(ConanFile):
 
     def source(self):
         self._checkout_source()
-        self._fix_source_permissions()
-        self._patch_source_cmake()
 
     def _checkout_source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -243,6 +241,8 @@ class RootConan(ConanFile):
             return "ON"
 
     def build(self):
+        self._fix_source_permissions()
+        self._patch_source_cmake()
         self._configured_cmake.build()
 
     def package(self):
