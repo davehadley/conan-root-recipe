@@ -12,7 +12,11 @@ class PythonOption:
     SYSTEM = "system"
     # in future we may allow the user to specify a version when
     # libPython is available in Conan Center Index.
+    # FIXME: add option to use CCI Python package when it is available
     ALL = [OFF, SYSTEM]
+
+
+required_conan_version = ">=1.29.1"
 
 
 class RootConan(ConanFile):
@@ -40,7 +44,7 @@ class RootConan(ConanFile):
         # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
     }
-    generators = "cmake_find_package"
+    generators = ("cmake", "cmake_find_package")
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -55,7 +59,7 @@ class RootConan(ConanFile):
         "zstd/1.4.5",
         "lz4/1.9.3",
         "glew/2.1.0",
-        "openssl/1.1.1h",
+        "openssl/1.1.1i",
         "fftw/3.3.8",
         "cfitsio/3.490",
         "tbb/2020.3",
@@ -110,16 +114,31 @@ class RootConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
 
     def _patch_source_cmake(self):
-        os.remove(os.sep.join((self._rootsrcdir, "cmake", "modules", "FindTBB.cmake")))
+        os.remove(
+            os.sep.join(
+                (
+                    self.source_folder,
+                    self._rootsrcdir,
+                    "cmake",
+                    "modules",
+                    "FindTBB.cmake",
+                )
+            )
+        )
         # Conan generated cmake_find_packages names differ from
         # names ROOT expects (usually only due to case differences)
         # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
-            os.sep.join((self._rootsrcdir, "CMakeLists.txt")),
+            os.sep.join((self.source_folder, self._rootsrcdir, "CMakeLists.txt")),
             "project(ROOT)",
             """project(ROOT)
+
+            # cmake script sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)
+            include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+            conan_basic_setup()
+
             find_package(OpenSSL REQUIRED)
             set(OPENSSL_VERSION ${OpenSSL_VERSION})
             find_package(LibXml2 REQUIRED)
@@ -141,7 +160,7 @@ class RootConan(ConanFile):
                 "**" + os.sep + "*.csh",
                 "**" + os.sep + "*.bat",
             )
-            for filename in glob(pattern, recursive=True)
+            for filename in glob(self.source_folder + os.sep + pattern, recursive=True)
         ]
         for s in scripts:
             self._make_file_executable(s)
@@ -180,26 +199,26 @@ class RootConan(ConanFile):
                     "builtin_davix": "OFF",
                     "builtin_tbb": "OFF",
                     # Enable builtins where there is no Conan package
-                    "builtin_xxhash": "ON",
-                    "builtin_afterimage": "ON",
-                    "builtin_gsl": "ON",
-                    "builtin_gl2ps": "ON",
-                    "builtin_ftgl": "ON",
-                    "builtin_vdt": "ON",
+                    "builtin_xxhash": "ON",  # FIXME : replace with xxhash CCI package when available
+                    "builtin_afterimage": "ON",  # FIXME : replace with afterimage CCI package when available
+                    "builtin_gsl": "ON",  # FIXME : replace with gsl CCI package when available
+                    "builtin_gl2ps": "ON",  # FIXME : replace with gl2ps CCI package when available
+                    "builtin_ftgl": "ON",  # FIXME : replace with ftgl CCI package when available
+                    "builtin_vdt": "ON",  # FIXME : replace with vdt CCI package when available
                     # No Conan packages available for these dependencies yet
-                    "davix": "OFF",
-                    "pythia6": "OFF",
-                    "pythia8": "OFF",
-                    "mysql": "OFF",
+                    "davix": "OFF",  # FIXME : switch on if davix CCI package available
+                    "pythia6": "OFF",  # FIXME : switch on if pythia6 CCI package available
+                    "pythia8": "OFF",  # FIXME : switch on if pythia8 CCI package available
+                    "mysql": "OFF",  # FIXME : switch on if mysql CCI package available
                     "oracle": "OFF",
-                    "pgsql": "OFF",
-                    "gfal": "OFF",
-                    "tmva-pymva": "OFF",
-                    "xrootd": "OFF",
+                    "pgsql": "OFF",  # FIXME: switch on if PostgreSQL CCI package available
+                    "gfal": "OFF",  # FIXME: switch on if gfal CCI package available
+                    "tmva-pymva": "OFF",  # FIXME: switch on if Python CCI package available
+                    "xrootd": "OFF",  # FIXME: switch on if xrootd CCI package available
                     "pyroot": self._pyrootopt,
                     # Tell CMake where to look for Conan provided depedencies
-                    "CMAKE_LIBRARY_PATH": cmakelibpath,
-                    "CMAKE_INCLUDE_PATH": cmakeincludepath,
+                    "CMAKE_LIBRARY_PATH": cmakelibpath.replace("\\", "/"),
+                    "CMAKE_INCLUDE_PATH": cmakeincludepath.replace("\\", "/"),
                     # Configure install directories
                     # Conan CCI hooks restrict the allowed install directory
                     # names but ROOT is very picky about where build/runtime
@@ -210,10 +229,10 @@ class RootConan(ConanFile):
                     # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["libpng"].include_paths
-                    ),
+                    ).replace("\\", "/"),
                     "LIBLZMA_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["xz_utils"].include_paths
-                    ),
+                    ).replace("\\", "/"),
                 },
             )
         return self._cmake
