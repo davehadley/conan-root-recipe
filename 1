@@ -1,0 +1,18 @@
+CMake Warning at cmake/modules/SearchRootCoreDeps.cmake:217 (message):
+  No supported Python 2 or 3 development packages were found; PyROOT will not
+  be built.
+Call Stack (most recent call first):
+  CMakeLists.txt:145 (include)
+
+
+/tmp/tmpbuild/source/root-6-22-02/core/lzma/src/ZipLZMA.c:13:10: fatal error: 'lzma.h' file not found
+#include "lzma.h"
+         ^~~~~~~~
+1 error generated.
+make[2]: *** [core/lzma/CMakeFiles/Lzma.dir/build.make:66: core/lzma/CMakeFiles/Lzma.dir/src/ZipLZMA.c.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:19344: core/lzma/CMakeFiles/Lzma.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+make: *** [Makefile:155: all] Error 2
+ERROR: conanfile.py (root/v6-22-02): Error in build() method, line 267
+	cmake.build()
+	ConanException: Error 2 while executing cmake --build '/tmp/tmpbuild/build' '--' '-j8'
