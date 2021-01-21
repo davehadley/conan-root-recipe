@@ -32,7 +32,7 @@ class CernRootConan(ConanFile):
     options = {
         # Don't allow static build as it is not supported
         # see: https://sft.its.cern.ch/jira/browse/ROOT-6446
-        # TODO: shared option should be reinstated when hooks issue is resolved
+        # FIXME: shared option should be reinstated when hooks issue is resolved
         # (see: https://github.com/conan-io/hooks/issues/252)
         # "shared": [True],
         "fPIC": [True, False],
@@ -112,40 +112,51 @@ class CernRootConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("root-{}".format(self.version.replace("v", "")), self._source_subfolder)
+        os.rename(
+            "root-{}".format(self.version.replace("v", "")),
+        )
 
     def _patch_source_cmake(self):
-        os.remove(
-            os.sep.join(
-                (
-                    self._source_subfolder,
-                    "cmake",
-                    "modules",
-                    "FindTBB.cmake",
+        try:
+            os.remove(
+                os.sep.join(
+                    (
+                        self.source_folder,
+                        self._source_subfolder,
+                        "cmake",
+                        "modules",
+                        "FindTBB.cmake",
+                    )
                 )
             )
-        )
+        except OSError:
+            pass
         # Conan generated cmake_find_packages names differ from
         # names ROOT expects (usually only due to case differences)
         # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
             "project(ROOT)",
-            "\n".join(("project(ROOT)",
-            "# sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)",
-            "include({}/conanbuildinfo.cmake)".format(self.install_folder.replace("\\", "/")),
-            "conan_set_vs_runtime()",
-            "find_package(OpenSSL REQUIRED)",
-            "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
-            "find_package(LibXml2 REQUIRED)",
-            "set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})",
-            "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
-            "find_package(SQLite3 REQUIRED)",
-            "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
-            "set(SQLITE_LIBRARIES SQLite::SQLite)",
-            ))
+            "\n".join(
+                (
+                    "project(ROOT)",
+                    "# sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)",
+                    "include({}/conanbuildinfo.cmake)".format(
+                        self.install_folder.replace("\\", "/")
+                    ),
+                    "conan_set_vs_runtime()",
+                    "find_package(OpenSSL REQUIRED)",
+                    "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
+                    "find_package(LibXml2 REQUIRED)",
+                    "set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})",
+                    "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
+                    "find_package(SQLite3 REQUIRED)",
+                    "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
+                    "set(SQLITE_LIBRARIES SQLite::SQLite)",
+                )
+            ),
         )
 
     def _fix_source_permissions(self):
@@ -172,7 +183,6 @@ class CernRootConan(ConanFile):
         if self._cmake is None:
             self._move_findcmake_conan_to_root_dir()
             self._cmake = CMake(self)
-            version = self.version.replace("v", "")
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
             cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
             self._cmake.configure(
@@ -240,7 +250,9 @@ class CernRootConan(ConanFile):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 "Find{}.cmake".format(f),
-                os.path.join(self._source_subfolder, "cmake", "modules"),
+                os.path.join(
+                    self.source_folder, self._source_subfolder, "cmake", "modules"
+                ),
             )
 
     @property
@@ -279,7 +291,7 @@ class CernRootConan(ConanFile):
         )
 
     def package_info(self):
-        # FIXME: ROOT generate multi 
+        # FIXME: ROOT generates multiple CMake files
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         self.cpp_info.names["cmake_find_package"] = "ROOT"

@@ -26,4 +26,6 @@ shell(
 shell(
     "conan export-pkg -f recipes/cern-root/all  testuser/testchannel --package-folder=/tmp/tmpbuild/package"
 )
-shell("conan test recipes/cern-root/all/test_package cern-root/v6-22-02@testuser/testchannel")
+shell(
+    "conan test recipes/cern-root/all/test_package cern-root/v6-22-02@testuser/testchannel"
+)
