@@ -114,6 +114,7 @@ class CernRootConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(
             "root-{}".format(self.version.replace("v", "")),
+            self._source_subfolder,
         )
 
     def _patch_source_cmake(self):
@@ -154,7 +155,7 @@ class CernRootConan(ConanFile):
                     "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
                     "find_package(SQLite3 REQUIRED)",
                     "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
-                    "set(SQLITE_LIBRARIES SQLite::SQLite)",
+                    "set(SQLITE_LIBRARIES SQLite::SQLite3)",
                 )
             ),
         )
