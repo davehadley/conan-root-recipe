@@ -65,6 +65,9 @@ class CernRootConan(ConanFile):
         "tbb/2020.3",
         "libpng/1.6.37",
     )
+    exports_sources = [
+        "CMakeLists.txt",
+    ]
 
     _cmake = None
 
@@ -132,33 +135,6 @@ class CernRootConan(ConanFile):
             )
         except OSError:
             pass
-        # Conan generated cmake_find_packages names differ from
-        # names ROOT expects (usually only due to case differences)
-        # There is currently no way to change these names
-        # see: https://github.com/conan-io/conan/issues/4430
-        # Patch ROOT CMake to use Conan dependencies
-        tools.replace_in_file(
-            os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
-            "project(ROOT)",
-            "\n".join(
-                (
-                    "project(ROOT)",
-                    "# sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)",
-                    "include({}/conanbuildinfo.cmake)".format(
-                        self.install_folder.replace("\\", "/")
-                    ),
-                    "conan_set_vs_runtime()",
-                    "find_package(OpenSSL REQUIRED)",
-                    "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
-                    "find_package(LibXml2 REQUIRED)",
-                    "set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})",
-                    "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
-                    "find_package(SQLite3 REQUIRED)",
-                    "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
-                    "set(SQLITE_LIBRARIES SQLite::SQLite3)",
-                )
-            ),
-        )
 
     def _fix_source_permissions(self):
         # Fix execute permissions on scripts
@@ -187,10 +163,10 @@ class CernRootConan(ConanFile):
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
             cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
             self._cmake.configure(
-                source_folder=self._source_subfolder,
+                # source_folder=self._source_subfolder,
                 build_folder=self._build_subfolder,
                 defs={
-                    # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
+                    # FIXME: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
                     # (see: https://github.com/conan-io/hooks/issues/252)
                     "BUILD_SHARED_LIBS": "ON",
                     "fail-on-missing": "ON",
