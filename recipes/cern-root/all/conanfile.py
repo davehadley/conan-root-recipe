@@ -21,9 +21,9 @@ required_conan_version = ">=1.29.1"
 
 class CernRootConan(ConanFile):
     name = "cern-root"
-    # v in version is intentional, ROOT does not follow strict SemVer.
+    # version format is intentional, ROOT does not follow strict SemVer.
     # see: https://root.cern/about/versioning/
-    version = "v6.22.06"
+    version = "v6-22-06"
     license = "LGPL-2.1-or-later"  # of ROOT itself, the recipe is under MIT license.
     homepage = "https://root.cern/"
     # ROOT itself is located at: https://github.com/root-project/root
@@ -115,7 +115,7 @@ class CernRootConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(
-            "root-{}".format(self.version.replace("v", "").replace(".", "-")),
+            "root-{}".format(self.version.replace("v", "")),
             self._source_subfolder,
         )
 
