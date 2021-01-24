@@ -196,7 +196,6 @@ class CernRootConan(ConanFile):
                     # (see: https://github.com/conan-io/hooks/issues/252)
                     "BUILD_SHARED_LIBS": "ON",
                     "fail-on-missing": "ON",
-                    "CMAKE_CXX_STANDARD": self._cmake_cxx_standard,
                     "gnuinstall": "OFF",
                     "soversion": "ON",
                     # Disable builtins and use Conan deps where available
@@ -257,14 +256,6 @@ class CernRootConan(ConanFile):
                     self.source_folder, self._source_subfolder, "cmake", "modules"
                 ),
             )
-
-    @property
-    def _cmake_cxx_standard(self):
-        compileropt = self.settings.compiler.get_safe("cppstd")
-        if compileropt:
-            return str(compileropt)
-        else:
-            return "11"
 
     @property
     def _pyrootopt(self):
