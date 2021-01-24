@@ -149,7 +149,7 @@ class CernRootConan(ConanFile):
                     "include({}/conanbuildinfo.cmake)".format(
                         self.install_folder.replace("\\", "/")
                     ),
-                    "conan_set_vs_runtime()",
+                    "conan_basic_setup(NO_OUTPUT_DIRS)",
                     "find_package(OpenSSL REQUIRED)",
                     "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
                     "find_package(LibXml2 REQUIRED)",
