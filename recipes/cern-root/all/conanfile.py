@@ -121,7 +121,7 @@ class CernRootConan(ConanFile):
         libcxx = compiler.get_safe("libcxx")
         if libcxx != "libstdc++11":
             raise ConanInvalidConfiguration(
-                '{} recipe requires "compiler.libcxx=libstdc++11".'.format(self.name)
+                '{} requires "compiler.libcxx=libstdc++11".'.format(self.name)
             )
 
     def source(self):
