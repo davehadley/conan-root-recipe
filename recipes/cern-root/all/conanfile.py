@@ -257,7 +257,6 @@ class CernRootConan(ConanFile):
                     "LIBLZMA_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["xz_utils"].include_paths
                     ).replace("\\", "/"),
-                    "CMAKE_VERBOSE_MAKEFILE": "TRUE",
                 },
             )
         return self._cmake
