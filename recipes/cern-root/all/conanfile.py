@@ -119,17 +119,9 @@ class CernRootConan(ConanFile):
     def _enforce_libcxx_requirements(self):
         compiler = self.settings.compiler
         libcxx = compiler.get_safe("libcxx")
-        version = tools.Version(self.settings.compiler.version.value)
-        if (
-            str(compiler) == "gcc"
-            and version >= "5"
-            and libcxx
-            and libcxx != "libstdc++11"
-        ):
+        if libcxx != "libstdc++11":
             raise ConanInvalidConfiguration(
-                '{} on gcc >= 5 requires "compiler.libcxx=libstdc++11".'.format(
-                    self.name
-                )
+                '{} recipe requires "compiler.libcxx=libstdc++11".'.format(self.name)
             )
 
     def source(self):
@@ -205,7 +197,7 @@ class CernRootConan(ConanFile):
     def _configured_cmake(self):
         if self._cmake is None:
             self._move_findcmake_conan_to_root_dir()
-            self._cmake = CMake(self)
+            self._cmake = CMake(self, set_cmake_flags=True)
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
             cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
             self._cmake.configure(
@@ -264,6 +256,7 @@ class CernRootConan(ConanFile):
                     "LIBLZMA_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["xz_utils"].include_paths
                     ).replace("\\", "/"),
+                    "CMAKE_VERBOSE_MAKEFILE": "TRUE",
                 },
             )
         return self._cmake
