@@ -265,16 +265,14 @@ class CernRootConan(ConanFile):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 "Find{}.cmake".format(f),
-                os.path.join(self.source_folder, self._source_subfolder, "cmake", "modules"),
+                os.path.join(
+                    self.source_folder, self._source_subfolder, "cmake", "modules"
+                ),
             )
 
     @property
     def _cmake_cxx_standard(self):
-        compileropt = self.settings.compiler.get_safe("cppstd")
-        if compileropt:
-            return str(compileropt)
-        else:
-            return "11"
+        return str(self.settings.compiler.get_safe("cppstd", "11"))
 
     @property
     def _pyrootopt(self):
