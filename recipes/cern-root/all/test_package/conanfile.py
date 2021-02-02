@@ -3,9 +3,9 @@ import os
 from conans import CMake, ConanFile, RunEnvironment, tools
 
 
-class RootTestConan(ConanFile):
+class CernRootTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package"
+    generators = ("cmake", "cmake_find_package")
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -20,7 +20,7 @@ class RootTestConan(ConanFile):
         with tools.environment_append(env_build.vars):
             cmake = CMake(self)
             cmake.configure(
-                {
+                defs={
                     "CMAKE_CXX_STANDARD": self._cmake_cxx_standard,
                 }
             )

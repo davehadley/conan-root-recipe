@@ -15,15 +15,17 @@ def shell(cmd):
     return check_call(cmd, shell=True)
 
 
-shell("conan source recipes/root/all --source-folder=/tmp/tmpbuild/source")
-shell("conan install recipes/root/all --install-folder=/tmp/tmpbuild/build")
+shell("conan source recipes/cern-root/all --source-folder=/tmp/tmpbuild/source")
+shell("conan install recipes/cern-root/all --install-folder=/tmp/tmpbuild/build")
 shell(
-    "conan build recipes/root/all --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build"
+    "conan build recipes/cern-root/all --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build"
 )
 shell(
-    "conan package recipes/root/all --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build --package-folder=/tmp/tmpbuild/package"
+    "conan package recipes/cern-root/all --source-folder=/tmp/tmpbuild/source --build-folder=/tmp/tmpbuild/build --package-folder=/tmp/tmpbuild/package"
 )
 shell(
-    "conan export-pkg -f recipes/root/all  testuser/testchannel --package-folder=/tmp/tmpbuild/package"
+    "conan export-pkg -f recipes/cern-root/all  testuser/testchannel --package-folder=/tmp/tmpbuild/package"
 )
-shell("conan test recipes/root/all/test_package root/v6-22-02@testuser/testchannel")
+shell(
+    "conan test recipes/cern-root/all/test_package cern-root/v6-22-02@testuser/testchannel"
+)

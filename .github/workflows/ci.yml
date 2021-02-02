@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: source setup-venv.sh && ./install-hooks.sh
       - name: Setup Conan
-        run: source setup-venv.sh && conan profile new default --detect
+        run: source setup-venv.sh && conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
       - name: Build
         run: source setup-venv.sh && ./test-build.sh
       - name: black
